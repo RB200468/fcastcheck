@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "timeseriesanalysispackage"
+version = "0.1.0"
+description = "package for analysing time-series data and forecasts visually"
+authors = ["Ryan Bendall <139355026+RB200468@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.6"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.4"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
