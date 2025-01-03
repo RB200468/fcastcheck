@@ -1,4 +1,4 @@
-# Finaly Year Computer Science Project
+# Final Year Computer Science Project
 
 By Ryan Bendall | University of Birmingham
 
