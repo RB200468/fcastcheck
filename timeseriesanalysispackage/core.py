@@ -1,7 +1,7 @@
 import sys
 
 def main():
-    if ((len(sys.argv) != 3) or (sys.argv != "run")):
+    if (len(sys.argv) != 3 or sys.argv[1] != "run"):
         print("Usage: timeseriesanalysispackage run <user_script.py>")
         sys.exit(1)
 
