@@ -50,5 +50,14 @@ timeseriesanalysispackage run <user_script.py>
 An example `user_script.py`
 
 ```
-TODO
+from timeseriesanalysispackage.chart import Chart
+
+
+my_chart = Chart(
+		title = "my_chart",
+		xdata = ['jan', 'feb', 'mar', 'apr', 'may'],
+		ydata = [10,15,25,45,20],
+		xlabel = 'Time',
+		ylabel = 'Sales (USD)'
+	)
 ```
