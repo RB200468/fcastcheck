@@ -1,8 +1,181 @@
 :root {
     --primary-font: "Roboto", serif;
-}
-
-body {
+    --clr-bg-primary: #E5E1DA;
+    --clr-bg-secondary: #B3C8CF;
+    --clr-bg-tertiary: #efefef;
+    --clr-txt-primary: black;
+    --clr-txt-secondary: #FFFFFF;
+    --clr-bg-primary-light: #E5E1DA;
+    --clr-bg-secondary-light: #B3C8CF;
+    --clr-bg-tertiary-light: #efefef;
+    --clr-txt-primary-light: black;
+    --clr-txt-secondary-light: #FFFFFF;
+    --clr-bg-primary-dark: #333235;
+    --clr-bg-secondary-dark: #49484b;
+    --clr-bg-tertiary-dark: #121212;
+    --clr-txt-primary-dark: white;
+    --clr-txt-secondary-dark: black;
+  }
+  
+  html, body {
     font-family: var(--primary-font);
-    color: red;
-}
+    color: var(--clr-txt-primary);
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    background-color: var(--clr-bg-tertiary);
+    font-size: large;
+  }
+  @media (min-width: 600px) {
+    html, body {
+      font-size: medium;
+    }
+  }
+  @media (min-width: 768px) {
+    html, body {
+      font-size: large;
+    }
+  }
+  
+  .container {
+    display: flex;
+    flex-flow: column nowrap;
+    height: 100px;
+    width: 100%;
+    overflow: visible;
+    max-height: 100vh;
+    box-sizing: border-box;
+  }
+  @media (min-width: 600px) {
+    .container {
+      flex-flow: row nowrap;
+      height: 100vh;
+      overflow: hidden;
+    }
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    height: 100vh;
+    width: 100%;
+    gap: 5px;
+    padding: 5px;
+    box-sizing: border-box;
+  }
+  @media (min-width: 600px) {
+    .grid {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      padding: 10px;
+      gap: 10px;
+    }
+  }
+  
+  .grid-item {
+    border-radius: 10px;
+    background-color: var(--clr-bg-primary);
+    box-sizing: border-box;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (min-width: 600px) {
+    .grid-item {
+      padding: 10px;
+    }
+  }
+  .grid-item.large {
+    grid-column: auto/span 1;
+    grid-row: auto/span 1;
+  }
+  @media (min-width: 600px) {
+    .grid-item.large {
+      grid-column: auto/span 3;
+      grid-row: auto/span 1;
+    }
+  }
+  .grid-item.small {
+    grid-column: auto/span 1;
+    grid-row: auto/span 1;
+  }
+  
+  .side-bar {
+    background-color: var(--clr-bg-secondary);
+    border-radius: 0 0 10px 10px;
+    height: 100vh;
+    width: 100%;
+    min-width: fit-content;
+    padding: 5px 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  @media (min-width: 600px) {
+    .side-bar {
+      flex-flow: column nowrap;
+      border-radius: 0 10px 10px 0;
+      width: 5%;
+      padding: 10px 5px;
+    }
+  }
+  
+  fieldset {
+    border: none;
+  }
+  fieldset > legend {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    clip: rect(0, 0, 0, 0);
+    overflow: hidden;
+  }
+  
+  .color-picker input[type=checkbox] {
+    appearance: none;
+    width: 10px;
+    height: 10px;
+    outline: 2px solid black;
+    outline-offset: 2px;
+    border-radius: 50%;
+  }
+  .color-picker input[type=checkbox]:hover {
+    cursor: pointer;
+  }
+  .color-picker input[type=checkbox]:checked {
+    background-color: black;
+  }
+  
+  .dark-theme {
+    --clr-bg-primary: var(--clr-bg-primary-dark);
+    --clr-bg-secondary: var(--clr-bg-secondary-dark);
+    --clr-bg-tertiary: var(--clr-bg-tertiary-dark);
+    --clr-txt-primary: var(--clr-txt-primary-dark);
+    --clr-txt-secondary: var(--clr-txt-secondary-dark);
+  }
+  
+  .light-theme {
+    --clr-bg-primary: var(--clr-bg-primary-light);
+    --clr-bg-secondary: var(--clr-bg-secondary-light);
+    --clr-bg-tertiary: var(--clr-bg-tertiary-light);
+    --clr-txt-primary: var(--clr-txt-primary-light);
+    --clr-txt-secondary: var(--clr-txt-secondary-light);
+  }
+  
+  :root:has(#dark:checked) {
+    --clr-bg-primary: var(--clr-bg-primary-dark);
+    --clr-bg-secondary: var(--clr-bg-secondary-dark);
+    --clr-bg-tertiary: var(--clr-bg-tertiary-dark);
+    --clr-txt-primary: var(--clr-txt-primary-dark);
+    --clr-txt-secondary: var(--clr-txt-secondary-dark);
+  }
+  
