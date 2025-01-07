@@ -28,7 +28,7 @@ class Chart:
             self.__chartData["fill"] = fill
         
     def getChartData(self):
-         return json.dumps(self.__chartData, indent=4)
+         return json.dumps(self.__chartData)
         
         
 

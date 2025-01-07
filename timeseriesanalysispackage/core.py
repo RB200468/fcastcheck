@@ -1,4 +1,4 @@
-import sys, importlib.util, uvicorn
+import sys, importlib.util, uvicorn, os
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -11,8 +11,11 @@ app = FastAPI()
 # Contains JSON Objects
 charts = []
 
-templates = Jinja2Templates(directory="./web/templates")
-app.mount("/static", StaticFiles(directory='./web/static'))
+templatesDir = os.path.join(os.path.dirname(__file__), 'web', 'templates')
+templates = Jinja2Templates(directory=templatesDir)
+
+staticDir = os.path.join(os.path.dirname(__file__), 'web', 'static')
+app.mount("/static", StaticFiles(directory=staticDir))
 
 
 @app.get("/", response_class=HTMLResponse)
