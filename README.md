@@ -52,12 +52,14 @@ An example `user_script.py`
 ```
 from timeseriesanalysispackage.chart import Chart
 
-
 my_chart = Chart(
-		title = "my_chart",
-		xdata = ['jan', 'feb', 'mar', 'apr', 'may'],
-		ydata = [10,15,25,45,20],
-		xlabel = 'Time',
-		ylabel = 'Sales (USD)'
+		timeLabels = ['jan', 'feb', 'mar', 'apr', 'may'],
+		yData = [10,15,25,45,20],
+		dataLabel = 'Sales (USD)'
+	)
+
+my_chart.options(
+		tension = 0.1,
+		borderColor = 'rgba(250, 220, 122, 1)'
 	)
 ```
