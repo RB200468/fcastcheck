@@ -1,4 +1,4 @@
-import sys, importlib.util, uvicorn
+import sys, importlib.util, uvicorn, os
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -8,9 +8,14 @@ from .chart import Chart
 
 app = FastAPI()
 
+# Contains JSON Objects
 charts = []
-templates = Jinja2Templates(directory="./web/templates")
-app.mount("/static", StaticFiles(directory='./web/static'))
+
+templatesDir = os.path.join(os.path.dirname(__file__), 'web', 'templates')
+templates = Jinja2Templates(directory=templatesDir)
+
+staticDir = os.path.join(os.path.dirname(__file__), 'web', 'static')
+app.mount("/static", StaticFiles(directory=staticDir))
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -19,7 +24,7 @@ def home(request:Request):
     global charts
     context= {
         'request': request,
-        'charts': charts
+        'charts': charts[0]
     }
     return templates.TemplateResponse("index.html", context)
 
@@ -39,7 +44,7 @@ def get_user_chart(filepath):
         attr_value = getattr(user_module, attr_name)
         # Check if the attribute is an instance of Chart
         if isinstance(attr_value, Chart):
-            charts.append(attr_value)
+            charts.append(attr_value.getChartData())
             print(f'Successfully added chart: {attr_name}')
     if not charts:
         raise ValueError("No Chart objects found in the user's script.")
@@ -56,7 +61,7 @@ def main():
         get_user_chart(user_script)
         
         for chart in charts:
-            print(f'Title: {chart.title}')
+            print(chart)
     except Exception as e:
         print(f"Error getting chart: {e}")
         sys.exit(1)

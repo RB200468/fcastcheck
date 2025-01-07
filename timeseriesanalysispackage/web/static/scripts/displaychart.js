@@ -1,18 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('myChart');
-  
+    
+    var chartsObj = JSON.parse(charts) //String to JSON
 
     const timeSeriesData = {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
-                 'August', 'September', 'October', 'November', 'December'],
+        labels: chartsObj.labels,
         datasets: [
             {
-                label: 'Monthly Sales',
-                data: [500, 700, 800, 600, 900, 1200, 1500, 1400, 1300, 1100, 1000, 1700],
-                borderColor: 'rgba(250, 198, 122, 1)',
+                label: chartsObj.label,
+                data: chartsObj.data,
+                borderColor: chartsObj.borderColor,
                 backgroundColor: 'rgba(250, 198, 122, 0.2)',
-                tension: 0.3, // For a smooth line curve
-                fill: false,   
+                tension: chartsObj.tension,
+                fill: chartsObj.fill,   
             }
         ]
     };
