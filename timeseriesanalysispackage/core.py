@@ -1,4 +1,4 @@
-import sys, importlib.util, uvicorn, os
+import sys, importlib.util, uvicorn, os, json
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -27,7 +27,7 @@ def home(request:Request):
     global registered_charts
     context= {
         'request': request,
-        'charts': registered_charts[0]
+        'charts': json.dumps(registered_charts[0])
     }
     return templates.TemplateResponse("index.html", context)
 
@@ -35,7 +35,7 @@ def home(request:Request):
 def get_prediction(name:str, steps:int):
     if name in registered_models.keys():
         model = registered_models.get(name)()
-        model.fit(data=[10,15,25,45,20])
+        model.fit(data=registered_charts[0].get('data'))
         pred_data = model.predict(steps=steps)
 
         return JSONResponse(content={'message': 'Good request', 'data': {'predictions': pred_data}}, status_code=200)
