@@ -32,11 +32,22 @@ def home(request:Request):
     return templates.TemplateResponse("index.html", context)
 
 @app.get("/model")
-def get_prediction(name:str, steps:int):
+def get_prediction(name:str, steps: int, start: int = None):
     if name in registered_models.keys():
         model = registered_models.get(name)()
-        model.fit(data=registered_charts[0].get('data'))
-        pred_data = model.predict(steps=steps)
+        temp_data = registered_charts[0].get('data')
+
+        if start:
+            pred_data = [None] * start
+            pred_data.append(temp_data[start])
+
+            model.fit(data=temp_data[:(start+1)])
+        else:
+            pred_data = [None] * (len(temp_data)-1)
+            pred_data.append(temp_data[-1])
+            model.fit(data=temp_data)
+
+        pred_data.extend(model.predict(steps=steps))
 
         return JSONResponse(content={'message': 'Good request', 'data': {'predictions': pred_data}}, status_code=200)
     else:
