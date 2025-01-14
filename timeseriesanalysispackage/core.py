@@ -29,7 +29,7 @@ def home(request:Request):
         'request': request,
         'charts': json.dumps(registered_charts[0])
     }
-    return templates.TemplateResponse("index.html", context)
+    return templates.TemplateResponse("index.jinja2", context)
 
 @app.get("/model")
 def get_prediction(name:str, steps: int, start: int = None):
