@@ -1,7 +1,7 @@
 import sys, importlib.util, uvicorn, os
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from inspect import isclass
 from .chart import Chart
@@ -20,7 +20,7 @@ templates = Jinja2Templates(directory=templatesDir)
 staticDir = os.path.join(os.path.dirname(__file__), 'web', 'static')
 app.mount("/static", StaticFiles(directory=staticDir))
 
-
+# Endpoints
 @app.get("/", response_class=HTMLResponse)
 def home(request:Request):
     """Render Home Screen"""
@@ -31,6 +31,16 @@ def home(request:Request):
     }
     return templates.TemplateResponse("index.html", context)
 
+@app.get("/model")
+def get_prediction(name:str, steps:int):
+    if name in registered_models.keys():
+        model = registered_models.get(name)()
+        model.fit(data=[10,15,25,45,20])
+        pred_data = model.predict(steps=steps)
+
+        return JSONResponse(content={'message': 'Good request', 'data': {'predictions': pred_data}}, status_code=200)
+    else:
+        return JSONResponse(content={'messge': 'Model not found'}, status_code=404)
 
 
 def get_user_data(filepath):

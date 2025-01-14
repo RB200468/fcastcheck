@@ -41,21 +41,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
     const btn = document.getElementById('updateBtn');
-
     btn.addEventListener('click', () => {
-        timeSeriesData.datasets.push({
-            label: 'Forecasted Sales',
-            data: [null, null, null, null, null, null, null, null, 1300, 1450, 1600, 1900],
-            borderColor: 'rgba(75, 192, 192, 1)',
-            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-            tension: 0.3, // For a smooth line curve
-            borderDash: [5, 5],
-            fill: false,   
-        });
-
-        myChart.update();
+        fetch('http://localhost:8001/model?name=MyModel&steps=2')
+            .then(response => {
+                if (!response.ok) {
+                    throw Error("Error Occured ", response.statusText)
+                }
+                return response.json();
+            })
+            .then(resJSON => {
+                timeSeriesData.datasets.push({
+                    label: 'Forecasted Sales',
+                    data: resJSON.data.predictions,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.3, // For a smooth line curve
+                    borderDash: [5, 5],
+                    fill: false,   
+                });
+        
+                myChart.update();
+            })
+            .catch(error => {
+                console.error('Error: ', error);
+            })
     });
-
-
 
 });
