@@ -1,15 +1,18 @@
-import sys, importlib.util, uvicorn, os
+import sys, importlib.util, uvicorn, os, json
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from inspect import isclass
 from .chart import Chart
+from .forecasting import ForecastingModel
 
 
 app = FastAPI()
 
 # Contains JSON Objects
-charts = []
+registered_charts = []
+registered_models = {}
 
 templatesDir = os.path.join(os.path.dirname(__file__), 'web', 'templates')
 templates = Jinja2Templates(directory=templatesDir)
@@ -17,21 +20,44 @@ templates = Jinja2Templates(directory=templatesDir)
 staticDir = os.path.join(os.path.dirname(__file__), 'web', 'static')
 app.mount("/static", StaticFiles(directory=staticDir))
 
-
+# Endpoints
 @app.get("/", response_class=HTMLResponse)
 def home(request:Request):
     """Render Home Screen"""
-    global charts
+    global registered_charts
     context= {
         'request': request,
-        'charts': charts[0]
+        'charts': json.dumps(registered_charts[0])
     }
     return templates.TemplateResponse("index.html", context)
 
+@app.get("/model")
+def get_prediction(name:str, steps: int, start: int = None):
+    if name in registered_models.keys():
+        model = registered_models.get(name)()
+        temp_data = registered_charts[0].get('data')
+
+        if start:
+            pred_data = [None] * start
+            pred_data.append(temp_data[start])
+
+            model.fit(data=temp_data[:(start+1)])
+        else:
+            pred_data = [None] * (len(temp_data)-1)
+            pred_data.append(temp_data[-1])
+            model.fit(data=temp_data)
+
+        pred_data.extend(model.predict(steps=steps))
+
+        return JSONResponse(content={'message': 'Good request', 'data': {'predictions': pred_data}}, status_code=200)
+    else:
+        return JSONResponse(content={'messge': 'Model not found'}, status_code=404)
 
 
-def get_user_chart(filepath):
-    global charts
+def get_user_data(filepath):
+    """Search user script for chart types and forecasting models"""
+
+    global registered_charts, registered_models
 
     # Loads the user's script
     spec = importlib.util.spec_from_file_location("user_script", filepath)
@@ -42,12 +68,30 @@ def get_user_chart(filepath):
     # Find's Chart attributes in users file and adds them to charts list
     for attr_name in dir(user_module):
         attr_value = getattr(user_module, attr_name)
-        # Check if the attribute is an instance of Chart
+
         if isinstance(attr_value, Chart):
-            charts.append(attr_value.getChartData())
+            """Checks for Chart objects"""
+            registered_charts.append(attr_value.getChartData())
             print(f'Successfully added chart: {attr_name}')
-    if not charts:
+        elif isclass(attr_value) and issubclass(attr_value, ForecastingModel) and attr_name != 'ForecastingModel':
+            """Checks for ForecastingModel subclasses"""
+            registered_models[attr_name] = attr_value
+            print(f'Successfully added model: {attr_name}')
+
+    if not registered_charts:
         raise ValueError("No Chart objects found in the user's script.")
+    
+    if not registered_models:
+        print("No Forecasting Models found in the user's script.'")
+
+
+def validate_chart() -> bool:
+    #TODO: Write function to validate charts
+    pass
+
+def validate_model(name, model) -> bool:
+    #TODO: write function to validate models
+    pass
 
 
 def main():
@@ -58,9 +102,9 @@ def main():
     user_script = sys.argv[2]
 
     try:
-        get_user_chart(user_script)
+        get_user_data(user_script)
         
-        for chart in charts:
+        for chart in registered_charts:
             print(chart)
     except Exception as e:
         print(f"Error getting chart: {e}")
