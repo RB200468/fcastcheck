@@ -5,43 +5,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Responsive Web App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="static/styles/index.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script type="text/javascript">var charts = {{ charts | tojson }};</script>
-    <script src="static/scripts/displaychart.js"></script>
 </head>
 
 <body>
-    <div class="container">
-        <div class="side-bar">
-            <form class="color-picker" action="">
-                <fieldset class="visually-hidden">
-                    <legend class="visually-hidden">Pick a colour theme</legend>
-                    <label for="dark" class="visually-hidden">Dark</label>
-                    <input type="checkbox" name="theme" id="dark" checked>
-                </fieldset>
-            </form>
-        </div>
-        <div class="grid">
-            <div class="grid-item large">
-                <div style="width: 100%;">
-                    <canvas id="myChart" aria-label="Chart" role="img">
-                        <p>Error Displaying Content</p>
-                    </canvas>
-                </div>
-                <button id="updateBtn">update</button>
-            </div>
-            <div class="grid-item small">
-                2
-            </div>
-            <div class="grid-item small">
-                3
-            </div>
-            <div class="grid-item small">
-                4
-            </div>
-        </div>
-    </div>
+    <header>
+        {% include "navbar.jinja2" %}
+    </header>
+
+    <main>
+
+    </main>
+
+    <footer>
+
+    </footer>
 </body>
 
 </html>
