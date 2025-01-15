@@ -1,0 +1,27 @@
+<head>
+    <script type="text/javascript">var charts = {{ charts | tojson }};</script>
+    <script src="static/scripts/displaychart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="static/styles/dashboard.css">
+</head>
+
+<div class="grid">
+    <div class="grid-item chart">
+        <canvas id="myChart" aria-label="Chart" role="img">
+            <p>Error Displaying Content</p>
+        </canvas>
+    </div>
+    <div class="grid-item forecast">
+        <h1>Forecast</h1>
+        <button id="updateBtn">update</button>
+    </div>
+    <div class="grid-item analysis">
+        3
+    </div>
+    <div class="grid-item analysis">
+        4
+    </div>
+    <div class="grid-item analysis">
+        5
+    </div>
+</div>

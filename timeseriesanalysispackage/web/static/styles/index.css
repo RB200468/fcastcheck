@@ -30,12 +30,20 @@
 html,body {
   margin: 0;
   padding: 0;
+  height: 100%;
 }
 
 body {
   font-family: var(--primary-font);
   background-color: var(--bg-color-1);
   color: var(--txt-color-1);
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+body:last-child {
+  margin-bottom: auto;
 }
 
 header {
@@ -48,9 +56,14 @@ header {
   padding: 8px 10px;
 }
 
+main {
+  width: 100%;
+  height: 100%;
+  padding: 0px 8px;
+  padding-bottom: 10px;
+}
+
 footer {
-  position: absolute;
-  bottom: 0;
   height: 30px;
   width: 100%;
   margin: 0;
