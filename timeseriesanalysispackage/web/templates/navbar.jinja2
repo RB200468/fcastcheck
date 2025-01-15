@@ -9,13 +9,13 @@
 <nav>
     <ul>
         <li>
-            <div>Chart1</div>
+            <div class="active" onclick="toggleActive(this)">Chart1</div>
         </li>
         <li>
-            <div>Chart2</div>
+            <div onclick="toggleActive(this)">Chart2</div>
         </li>
         <li>
-            <div>Chart3</div>
+            <div onclick="toggleActive(this)">Chart3</div>
         </li>
         <li>
             <div class="theme-switch-btn" onclick="changeTheme()">
@@ -24,3 +24,15 @@
         </li>
     </ul>
 </nav>
+<script>
+    function toggleActive(element) {
+        if (element.classList.contains('active')) {
+            element.classList.remove('active');
+        } else {
+            document.querySelectorAll('nav ul li div').forEach(div => {
+                div.classList.remove('active');
+            });
+            element.classList.toggle('active');
+        }
+    };
+</script>

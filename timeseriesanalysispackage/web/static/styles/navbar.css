@@ -25,8 +25,10 @@ nav ul li div {
     padding: 5px 5px;
     border-radius: 6px;
     background-color: var(--bg-color-2);
+    transition: all 0.1s ease-in-out;
 }
 
+nav ul li div.active,
 nav ul li div:hover {
     cursor: pointer;
     padding: 5px 8px;
