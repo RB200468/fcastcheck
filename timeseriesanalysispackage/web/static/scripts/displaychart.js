@@ -10,34 +10,70 @@ document.addEventListener('DOMContentLoaded', function() {
                 label: chartsObj.label,
                 data: chartsObj.data,
                 borderColor: chartsObj.borderColor,
-                backgroundColor: 'rgba(250, 198, 122, 0.2)',
+                backgroundColor: chartsObj.borderColor,
                 tension: chartsObj.tension,
                 fill: chartsObj.fill,   
             }
         ]
     };
     
+    const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
+
     const config = {
         type: 'line',
         data: timeSeriesData,
         options: {
             maintainAspectRatio: window.innerWidth <= 600,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        usePointStyle: true,
+                        color: txt_color_1
+                    }
+                },
+            },
             scales: {
+                x: {
+                    ticks: {
+                        color: txt_color_1
+                    },
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        color: txt_color_1
+                    }
+                },
                 y: {
-                    beginAtZero: true
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: chartsObj.title,
+                        color: txt_color_1
+                    },
+                    ticks: {
+                        color: txt_color_1
+                    },
+                    grid: {
+                        display: false
+                    },
+                    border: {
+                        color: txt_color_1
+                    }
                 },
             },   
         },
     }
 
     const myChart = new Chart(ctx, config);
+    window.myChart = myChart;
 
     window.addEventListener('resize', () => {
         const isScreenWide = window.innerWidth <= 600;
         myChart.options.maintainAspectRatio = isScreenWide;
         myChart.update()
     })
-
 
 
     const btn = document.getElementById('updateBtn');
@@ -79,5 +115,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error: ', error);
             })
     });
-
 });
