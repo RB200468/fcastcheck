@@ -1,12 +1,13 @@
 import json
 class Chart:
-    def __init__(self, timeLabels, yData, dataLabel=None):
+    def __init__(self, timeLabels, yData, yTitle=None, dataLabel=None):
             self.__labels = timeLabels
             self.__data = yData
             self.__label = dataLabel if dataLabel else ""
+            self.__title = yTitle if yTitle else ""
 
             # Default options
-            self.__borderColor = 'rgba(250, 198, 122, 1)'
+            self.__borderColor = '#0069C3'
             self.__tension = 0.3
             self.__fill = False
         
@@ -16,7 +17,8 @@ class Chart:
                 "label": self.__label,
                 "borderColor": self.__borderColor,
                 "tension": self.__tension,
-                "fill": self.__fill
+                "fill": self.__fill,
+                "title": self.__title
             }
     
     def options(self, borderColor=None, tension=None, fill=None):
