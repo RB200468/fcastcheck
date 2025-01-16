@@ -20,6 +20,15 @@ function changeTheme() {
         document.documentElement.style.setProperty('--bg-color-2', bg_color_2_dark);
         document.documentElement.style.setProperty('--txt-color-1', txt_color_1_dark);
         document.documentElement.style.setProperty('--txt-color-2', txt_color_2_dark);
+        
+        /* Change Chart Dark */
+        window.myChart.options.scales.x.ticks.color = txt_color_1_dark;
+        window.myChart.options.scales.y.ticks.color = txt_color_1_dark;
+        window.myChart.options.scales.x.border.color = txt_color_1_dark;
+        window.myChart.options.scales.y.border.color = txt_color_1_dark;
+        window.myChart.options.scales.y.title.color = txt_color_1_dark;
+        window.myChart.options.plugins.legend.labels.color = txt_color_1_dark;
+
     } else if (theme_icon.classList.contains('bxs-moon')) {
         /* Change to Light */
         theme_icon.classList.replace('bxs-moon', 'bxs-sun');
@@ -27,5 +36,14 @@ function changeTheme() {
         document.documentElement.style.setProperty('--bg-color-2', bg_color_2_light);
         document.documentElement.style.setProperty('--txt-color-1', txt_color_1_light);
         document.documentElement.style.setProperty('--txt-color-2', txt_color_2_light);
+        
+        /* Change Chart Light */
+        window.myChart.options.scales.x.ticks.color = txt_color_1_light;
+        window.myChart.options.scales.y.ticks.color = txt_color_1_light;
+        window.myChart.options.scales.x.border.color = txt_color_1_light;
+        window.myChart.options.scales.y.border.color = txt_color_1_light;
+        window.myChart.options.scales.y.title.color = txt_color_1_light;
+        window.myChart.options.plugins.legend.labels.color = txt_color_1_light;
     }
+    window.myChart.update();
 };
