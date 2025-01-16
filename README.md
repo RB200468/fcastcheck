@@ -65,9 +65,10 @@ Create chart objects to use in your analysis
 
 ```
 my_chart = Chart(
-		timeLabels = ['jan', 'feb', 'mar', 'apr', 'may'],
+		timeLabels = ['January', 'Feburary', 'March', 'April', 'May'],
 		yData = [10,15,25,45,20],
-		dataLabel = 'Sales (USD)'
+		yTitle = "Sales Figures (in Millions USD)",
+		dataLabel = 'Apples'
 	)
 ```
 
@@ -75,9 +76,10 @@ you can add options to your chart to make it more bespoke
 
 ```
 my_chart = Chart(
-		timeLabels = ['jan', 'feb', 'mar', 'apr', 'may'],
+		timeLabels = ['January', 'Feburary', 'March', 'April', 'May'],
 		yData = [10,15,25,45,20],
-		dataLabel = 'Sales (USD)'
+		yTitle = "Sales Figures (in Millions USD)",
+		dataLabel = 'Apples'
 	)
 
 my_chart.options(
@@ -92,7 +94,7 @@ The default options are as follows:
 ```
 default_options.options(
 		tension = 0.3,
-		borderColor = 'rgba(250, 198, 122, 1)',
+		borderColor = '#0069C3',
 		fill = False
 	)
 ```
@@ -130,8 +132,8 @@ class MyModel(ForecastingModel):
 
 	def predict(self, steps: int):
 		prediction_data = []
-		for i in range(len(self.model)):
-			prediction_data.append(self.model[i] * 2)
+		for i in range(steps):
+			prediction_data.append(random.randrange(1,101))
 		return prediction_data
 ```
 
@@ -147,7 +149,8 @@ from timeseriesanalysispackage.forecasting import ForecastingModel
 my_chart = Chart(
 		timeLabels = ['January', 'Feburary', 'March', 'April', 'May'],
 		yData = [10,15,25,45,20],
-		dataLabel = 'Sales (USD)'
+		yTitle = "Sales Figures (in Millions USD)",
+		dataLabel = 'Apples'
 	)
 
 my_chart.options(
