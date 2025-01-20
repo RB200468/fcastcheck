@@ -8,15 +8,11 @@
 
 <nav>
     <ul>
+        {% for chart in charts %}
         <li>
-            <div class="active" onclick="toggleActive(this)">Chart1</div>
+            <div onclick="toggleActive(this)">{{ chart }}</div>
         </li>
-        <li>
-            <div onclick="toggleActive(this)">Chart2</div>
-        </li>
-        <li>
-            <div onclick="toggleActive(this)">Chart3</div>
-        </li>
+        {% endfor %}
         <li>
             <div class="theme-switch-btn" onclick="changeTheme()">
                 <i class="bx bxs-sun" id="theme-icon"></i>
@@ -25,6 +21,14 @@
     </ul>
 </nav>
 <script>
+    // First Chart is always active when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        const firstChartName = document.querySelector('nav ul li div');
+        if (firstChartName) {
+            toggleActive(firstChartName);
+        }
+    });
+
     function toggleActive(element) {
         if (element.classList.contains('active')) {
             element.classList.remove('active');
@@ -33,6 +37,9 @@
                 div.classList.remove('active');
             });
             element.classList.toggle('active');
+
+            let content = element.textContent.trim();
+            document.dispatchEvent(new CustomEvent("activeChartChanged", { detail: content }));
         }
     };
 </script>
