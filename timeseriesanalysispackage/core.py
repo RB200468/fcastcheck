@@ -11,7 +11,7 @@ from .forecasting import ForecastingModel
 app = FastAPI()
 
 # Contains JSON Objects
-registered_charts = []
+registered_charts = {}
 registered_models = {}
 
 templatesDir = os.path.join(os.path.dirname(__file__), 'web', 'templates')
@@ -27,7 +27,7 @@ def home(request:Request):
     global registered_charts
     context= {
         'request': request,
-        'charts': json.dumps(registered_charts[0])
+        'charts': list(registered_charts.keys())
     }
     return templates.TemplateResponse("index.jinja2", context)
 
@@ -53,6 +53,13 @@ def get_prediction(name:str, steps: int, start: int = None):
     else:
         return JSONResponse(content={'messge': 'Model not found'}, status_code=404)
 
+@app.get("/chart")
+def get_chart(name: str):
+    if name in registered_charts.keys():
+        return JSONResponse(content={'content': registered_charts[name]}, status_code=200)
+    else:
+        return JSONResponse(content={'content': "Chart not found"})
+
 
 def get_user_data(filepath):
     """Search user script for chart types and forecasting models"""
@@ -65,13 +72,13 @@ def get_user_data(filepath):
     sys.modules["user_script"] = user_module
     spec.loader.exec_module(user_module)
 
-    # Find's Chart attributes in users file and adds them to charts list
+    # Find's attributes in user's script and add them to dicts
     for attr_name in dir(user_module):
         attr_value = getattr(user_module, attr_name)
 
         if isinstance(attr_value, Chart):
             """Checks for Chart objects"""
-            registered_charts.append(attr_value.getChartData())
+            registered_charts[attr_name] = attr_value.getChartData()
             print(f'Successfully added chart: {attr_name}')
         elif isclass(attr_value) and issubclass(attr_value, ForecastingModel) and attr_name != 'ForecastingModel':
             """Checks for ForecastingModel subclasses"""
