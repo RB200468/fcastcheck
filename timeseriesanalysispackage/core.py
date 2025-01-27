@@ -1,4 +1,4 @@
-import sys, importlib.util, uvicorn, os, json
+import sys, importlib.util, uvicorn, os, json, random
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -27,31 +27,10 @@ def home(request:Request):
     global registered_charts
     context= {
         'request': request,
-        'charts': list(registered_charts.keys())
+        'charts': list(registered_charts.keys()),
+        'models': list(registered_models.keys())
     }
     return templates.TemplateResponse("index.jinja2", context)
-
-@app.get("/model")
-def get_prediction(name:str, steps: int, start: int = None):
-    if name in registered_models.keys():
-        model = registered_models.get(name)()
-        temp_data = registered_charts[0].get('data')
-
-        if start:
-            pred_data = [None] * start
-            pred_data.append(temp_data[start])
-
-            model.fit(data=temp_data[:(start+1)])
-        else:
-            pred_data = [None] * (len(temp_data)-1)
-            pred_data.append(temp_data[-1])
-            model.fit(data=temp_data)
-
-        pred_data.extend(model.predict(steps=steps))
-
-        return JSONResponse(content={'message': 'Good request', 'data': {'predictions': pred_data}}, status_code=200)
-    else:
-        return JSONResponse(content={'messge': 'Model not found'}, status_code=404)
 
 @app.get("/chart")
 def get_chart(name: str):
@@ -59,6 +38,48 @@ def get_chart(name: str):
         return JSONResponse(content={'content': registered_charts[name]}, status_code=200)
     else:
         return JSONResponse(content={'content': "Chart not found"})
+
+@app.put("/forecast")
+def put_forecast(chart: str,model: str, start: int, steps: int, name: str):
+    if not chart in registered_charts.keys():
+        return JSONResponse(content={'content': "Chart Not Found."}, status_code=404)
+    elif not model in registered_models.keys():
+        return JSONResponse(content={'content': "Model Not Found"}, status_code=404)
+    
+    # Get Data
+    current_chart = registered_charts.get(chart)
+    current_model_class = registered_models.get(model)
+    current_data = current_chart['datasets'][0].get('data')
+    current_model = current_model_class()
+
+    # Train and Predict
+    pred_data = [None] * start
+    pred_data.append(current_data[start])
+    current_model.fit(data=current_data[:(start+1)])
+    pred_data.extend(current_model.predict(steps=steps))
+
+    #Update Labels
+    current_labels_length = len(current_chart['labels'])
+    forecast_data_length = len(pred_data)
+    new_labels_num = max(0, (forecast_data_length - current_labels_length))
+    new_labels = []
+    for i in range(current_labels_length, current_labels_length + new_labels_num):
+        new_labels.append(f"Point {i}")
+    current_chart['labels'].extend(new_labels)
+
+    # Add forecast line
+    line_colour = random_hex_colour()
+
+    forecast_line = {
+        "label": name,
+        "data": pred_data,
+        "borderColor": line_colour,
+        "backgroundColor": line_colour,
+        "borderDash": [5,5]
+    }
+    current_chart["datasets"].append(forecast_line)
+
+    return JSONResponse(content={'content': chart}, status_code=200)
 
 
 def get_user_data(filepath):
@@ -92,13 +113,8 @@ def get_user_data(filepath):
         print("No Forecasting Models found in the user's script.'")
 
 
-def validate_chart() -> bool:
-    #TODO: Write function to validate charts
-    pass
-
-def validate_model(name, model) -> bool:
-    #TODO: write function to validate models
-    pass
+def random_hex_colour():
+    return "#{:06x}".format(random.randint(0,0xFFFFFF))
 
 
 def main():
@@ -110,9 +126,6 @@ def main():
 
     try:
         get_user_data(user_script)
-        
-        for chart in registered_charts:
-            print(chart)
     except Exception as e:
         print(f"Error getting chart: {e}")
         sys.exit(1)
