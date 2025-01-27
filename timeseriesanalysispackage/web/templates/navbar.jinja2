@@ -39,6 +39,7 @@
             element.classList.toggle('active');
 
             let content = element.textContent.trim();
+            window.currentChartName = content;
             document.dispatchEvent(new CustomEvent("activeChartChanged", { detail: content }));
         }
     };
