@@ -8,26 +8,34 @@ class Chart:
 
             # Default options
             self.__borderColor = '#0069C3'
+            self.__backgroundColor = '#0069C3'
             self.__tension = 0.3
             self.__fill = False
         
             self.__chartData = {
-                "labels": self.__labels,
-                "data": self.__data,
-                "label": self.__label,
-                "borderColor": self.__borderColor,
-                "tension": self.__tension,
-                "fill": self.__fill,
-                "title": self.__title
+                 "labels": self.__labels,
+                 "title": self.__title,
+                 "datasets": [
+                    {
+                        "label": self.__label,
+                        "data": self.__data,
+                        "borderColor": self.__borderColor,
+                        "backgroundColor": self.__backgroundColor,
+                        "tension": self.__tension,
+                        "fill": self.__fill,
+                    }
+                 ]
             }
     
-    def options(self, borderColor=None, tension=None, fill=None):
+    def options(self, borderColor=None, tension=None, fill=None, backgroundColor=None):
         if borderColor:
             self.__chartData["borderColor"] = borderColor
         if tension:
             self.__chartData["tension"] = tension
         if fill:
             self.__chartData["fill"] = fill
+        if backgroundColor:
+             self.__chartData["backgroundColor"] = backgroundColor
         
     def getChartData(self):
          return self.__chartData

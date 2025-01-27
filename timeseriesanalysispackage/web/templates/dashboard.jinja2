@@ -11,8 +11,32 @@
         </canvas>
     </div>
     <div class="grid-item forecast">
-        <h1>Forecast</h1>
-        <button id="updateBtn">update</button>
+        <div class="forecast-form-wrapper">
+            <h1>Forecast</h1>
+            <form class="forecast-form" id="form">
+                <div class="input-box">
+                    <h3>Model</h3>
+                    <select name="model" id="model-selecter">
+                        {% for model in models%}
+                        <option value="{{ model }}">{{ model }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="input-box">
+                    <h3>Start</h3>
+                    <input name="start" type="text" placeholder="Start">
+                </div>
+                <div class="input-box">
+                    <h3>Steps</h3>
+                    <input name="steps" type="text" placeholder="Steps">
+                </div>
+                <div class="input-box">
+                    <h3>Name</h3>
+                    <input name="name" type="text" placeholder="Name">
+                </div>
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
+        </div>
     </div>
     <div class="grid-item analysis">
         3
@@ -24,3 +48,26 @@
         5
     </div>
 </div>
+<script>
+    document.getElementById("form").addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        // Get all form data
+        const formData = new FormData(this);
+        const formValues = Object.fromEntries(formData.entries());
+
+        fetch(`http://localhost:8001/forecast?chart=${window.currentChartName}&model=${formValues.model}&start=${formValues.start}&steps=${formValues.steps}&name=${formValues.name}`, {
+            method: "PUT"
+        })
+            .then(response => {
+                return response.json();
+            }).then(responseJSON => {
+                // Re-build current chart
+                document.dispatchEvent(new CustomEvent("activeChartChanged", { detail: responseJSON.content }));
+            }).catch(error => {
+                console.error("Error: ", error);
+            }).finally(() => {
+                document.getElementById('form').reset();
+            });
+    });
+</script>
