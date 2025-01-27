@@ -30,12 +30,57 @@
   }
 
   .grid-item.forecast {
+    border: 1.5px solid var(--txt-color-1);
+    border-radius: 5px;
     grid-column: auto/span 1;
     grid-row: auto/span 1;
     background-color: var(--bg-color-1);
+    padding: 20px 5px;
+
   }
 
-  @media (min-width: 600px) {
+  .forecast-form-wrapper {
+    height: 100%;
+    width: 100%;
+  }
+
+  .forecast-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0px 10px;
+    margin-top: 15px;
+  }
+  
+
+  .submit-btn {
+    margin-top: 70px;
+    width: fit-content;
+    border: 2px solid var(--bg-color-2);
+    background-color: var(--bg-color-2);
+    color: var(--txt-color-1);
+    border-radius: 5px;
+    padding: 3px 10px;
+    font-size: 16px;
+  }
+
+  .submit-btn:hover {
+    cursor: pointer;
+    border: 2px solid var(--txt-color-1);
+    font-weight: bold;
+  }
+
+  input, select {
+    outline: none;
+    height: fit-content;
+    padding: 4px 3px;
+    border-radius: 5px;
+    border: 1px solid var(--txt-color-1);
+    background-color: var(--bg-color-2);
+    color: var(--txt-color-1);
+  }
+
+  @media (min-width: 577px) {
     .grid {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
@@ -51,6 +96,7 @@
     .grid-item.forecast {
       grid-column: auto/span 3;
       grid-row: auto/span 4;
+      padding: 20px 15px;
     }
   
     .grid-item.analysis {
@@ -58,5 +104,15 @@
       grid-row: auto/span 4;
     }
   }
+
+  @media (min-width: 993px) {
+    .grid-item.forecast {
+      grid-column: auto/span 3;
+      grid-row: auto/span 4;
+      padding: 20px 50px;
+    }
+  }
+
+
 
   
