@@ -61,8 +61,6 @@ def get_forecast(name: str):
     # Get all models
     current_models = []
     for model in current_forecast.models:
-        print(model)
-        print(registered_models.keys())
         if model not in registered_models.keys():
             return JSONResponse(content={'content': "Model not found"})        
         current_models.append(registered_models[model])
