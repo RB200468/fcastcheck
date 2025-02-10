@@ -25,6 +25,7 @@ document.addEventListener("activeChartChanged", (event) => {
             // Update New Canvas
             const ctx = newCanvas.getContext('2d');
             builtChart = buildChart(ctx, data.content);
+            document.dispatchEvent(new CustomEvent("forecastsChanged", { detail: data.forecasts }));
         })
         .catch (error => {
             console.error("Error: ", error)

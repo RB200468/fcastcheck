@@ -44,41 +44,25 @@
     width: 100%;
   }
 
-  .forecast-form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 0px 10px;
-    margin-top: 15px;
-  }
-  
-
-  .submit-btn {
-    margin-top: 70px;
+  .forecast-btn {
+    border-radius: 5px;
     width: fit-content;
-    border: 2px solid var(--bg-color-2);
-    background-color: var(--bg-color-2);
-    color: var(--txt-color-1);
-    border-radius: 5px;
-    padding: 3px 10px;
-    font-size: 16px;
-  }
-
-  .submit-btn:hover {
-    cursor: pointer;
-    border: 2px solid var(--txt-color-1);
-    font-weight: bold;
-  }
-
-  input, select {
-    outline: none;
     height: fit-content;
-    padding: 4px 3px;
-    border-radius: 5px;
-    border: 1px solid var(--txt-color-1);
-    background-color: var(--bg-color-2);
+    padding: 4px 8px;
     color: var(--txt-color-1);
+    background-color: var(--bg-color-2);
   }
+
+  .forecast-btn.active,
+  .forecast-btn:hover{
+    cursor: pointer;
+    padding: 4px 10px;
+    background-color: var(--txt-color-1);
+    color: var(--bg-color-1);
+    transition: all 0.1s ease-in-out;
+  }
+
+  
 
   @media (min-width: 577px) {
     .grid {
