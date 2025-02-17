@@ -41,6 +41,7 @@ document.addEventListener("forecastsChanged", () => {
 
 function buildBubbleChart(ctx, chartData){
 
+    const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
     const config = {
         type: 'bubble',
         data: { datasets: chartData },

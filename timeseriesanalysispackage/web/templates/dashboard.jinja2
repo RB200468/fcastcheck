@@ -1,6 +1,7 @@
 <head>
     <script src="static/scripts/displaychart.js"></script>
     <script src="static/scripts/displayAccuracyUncertainty.js"></script>
+    <script src="static/scripts/displayIntervalChart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="static/styles/dashboard.css">
 </head>
@@ -13,7 +14,7 @@
     </div>
     <div class="grid-item forecast">
         <div id="forecast-wrapper" class="forecast-form-wrapper">
-            <h1>Forecast</h1>
+            <h1>Forecasts</h1>
 
         </div>
     </div>
@@ -27,8 +28,12 @@
     <div class="grid-item analysis">
         4
     </div>
-    <div class="grid-item analysis">
-        5
+    <div class="grid-item analysis interval">
+        <h3>Prediction and Confidence Interval</h3>
+        <p>Smaller interval is better</p>
+        <div id="interval-chart-wrapper" class="interval-chart-wrapper">
+            <canvas id="intervalChart"></canvas>
+        </div>
     </div>
 </div>
 <script>
