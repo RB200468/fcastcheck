@@ -1,5 +1,11 @@
 const theme_icon = document.getElementById('theme-icon');
 
+/* Current Colors */
+const bg_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-1').trim();
+const bg_color_2 = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-2').trim();
+const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
+const txt_color_2 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-2').trim();
+
 /* Dark Colors */
 const bg_color_1_dark = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-1-dark').trim();
 const bg_color_2_dark = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-2-dark').trim();

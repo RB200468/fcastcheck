@@ -1,5 +1,6 @@
 <head>
     <script src="static/scripts/displaychart.js"></script>
+    <script src="static/scripts/displayAccuracyUncertainty.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="static/styles/dashboard.css">
 </head>
@@ -16,8 +17,12 @@
 
         </div>
     </div>
-    <div class="grid-item analysis">
-        3
+    <div class="grid-item analysis bubble">
+        <h3>Accuracy vs Uncertainty</h3>
+        <p>Lower is better</p>
+        <div id="bubble-chart-wrapper" class="bubble-chart-wrapper">
+            <canvas id="bubbleChart"></canvas>
+        </div>
     </div>
     <div class="grid-item analysis">
         4
