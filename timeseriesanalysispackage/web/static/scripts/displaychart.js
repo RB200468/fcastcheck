@@ -37,8 +37,6 @@ function buildChart(ctx, chartData){
         labels: chartData.labels,
         datasets: chartData.datasets
     };
-    
-    const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
 
     const config = {
         type: 'line',
@@ -56,15 +54,9 @@ function buildChart(ctx, chartData){
             },
             scales: {
                 x: {
-                    ticks: {
-                        color: txt_color_1
-                    },
-                    grid: {
-                        display: false
-                    },
-                    border: {
-                        color: txt_color_1
-                    }
+                    ticks: { color: txt_color_1 },
+                    grid: { display: false },
+                    border: { color: txt_color_1 }
                 },
                 y: {
                     beginAtZero: true,
@@ -73,15 +65,9 @@ function buildChart(ctx, chartData){
                         text: chartData.title,
                         color: txt_color_1
                     },
-                    ticks: {
-                        color: txt_color_1
-                    },
-                    grid: {
-                        display: false
-                    },
-                    border: {
-                        color: txt_color_1
-                    }
+                    ticks: { color: txt_color_1 },
+                    grid: { display: false },
+                    border: { color: txt_color_1 }
                 },
             },   
         },
@@ -97,37 +83,24 @@ window.addEventListener('resize', () => {
     builtChart.update()
 })
 
-/* Dark Colors */
-const chrt_bg_color_1_dark = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-1-dark').trim();
-const chrt_bg_color_2_dark = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-2-dark').trim();
-const chrt_txt_color_1_dark = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1-dark').trim();
-const chrt_txt_color_2_dark = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-2-dark').trim();
-
-/* Light Colors */
-const chrt_bg_color_1_light = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-1-light').trim();
-const chrt_bg_color_2_light = getComputedStyle(document.documentElement).getPropertyValue('--bg-color-2-light').trim();
-const chrt_txt_color_1_light = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1-light').trim();
-const chrt_txt_color_2_light = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-2-light').trim();
-
-
 document.addEventListener('themeSwitched', (event) => {
     if (event.detail == 'dark') {
         /* Change Chart Dark */
-        builtChart.options.scales.x.ticks.color = chrt_txt_color_1_dark;
-        builtChart.options.scales.y.ticks.color = chrt_txt_color_1_dark;
-        builtChart.options.scales.x.border.color = chrt_txt_color_1_dark;
-        builtChart.options.scales.y.border.color = chrt_txt_color_1_dark;
-        builtChart.options.scales.y.title.color = chrt_txt_color_1_dark;
-        builtChart.options.plugins.legend.labels.color = chrt_txt_color_1_dark;
+        builtChart.options.scales.x.ticks.color = txt_color_1_dark;
+        builtChart.options.scales.y.ticks.color = txt_color_1_dark;
+        builtChart.options.scales.x.border.color = txt_color_1_dark;
+        builtChart.options.scales.y.border.color = txt_color_1_dark;
+        builtChart.options.scales.y.title.color = txt_color_1_dark;
+        builtChart.options.plugins.legend.labels.color = txt_color_1_dark;
 
     } else if (event.detail == 'light') {
         /* Change Chart Light */
-        builtChart.options.scales.x.ticks.color = chrt_txt_color_1_light;
-        builtChart.options.scales.y.ticks.color = chrt_txt_color_1_light;
-        builtChart.options.scales.x.border.color = chrt_txt_color_1_light;
-        builtChart.options.scales.y.border.color = chrt_txt_color_1_light;
-        builtChart.options.scales.y.title.color = chrt_txt_color_1_light;
-        builtChart.options.plugins.legend.labels.color = chrt_txt_color_1_light;
+        builtChart.options.scales.x.ticks.color = txt_color_1_light;
+        builtChart.options.scales.y.ticks.color = txt_color_1_light;
+        builtChart.options.scales.x.border.color = txt_color_1_light;
+        builtChart.options.scales.y.border.color = txt_color_1_light;
+        builtChart.options.scales.y.title.color = txt_color_1_light;
+        builtChart.options.plugins.legend.labels.color = txt_color_1_light;
     }
     builtChart.update();
 });
