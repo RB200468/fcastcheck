@@ -2,7 +2,9 @@
     <script src="static/scripts/displaychart.js"></script>
     <script src="static/scripts/displayAccuracyUncertainty.js"></script>
     <script src="static/scripts/displayIntervalChart.js"></script>
+    <script src="static/scripts/displayHeatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix"></script>
     <link rel="stylesheet" href="static/styles/dashboard.css">
 </head>
 
@@ -25,8 +27,12 @@
             <canvas id="bubbleChart"></canvas>
         </div>
     </div>
-    <div class="grid-item analysis">
-        4
+    <div class="grid-item analysis heatmap">
+        <h3>Performance Metrics Over Time</h3>
+        <p>Lighter is better</p>
+        <div id="heatmap-chart-wrapper" class="heatmap-chart-wrapper">
+            <div id="heatmapChart"></div>
+        </div>
     </div>
     <div class="grid-item analysis interval">
         <h3>Prediction and Confidence Interval</h3>
