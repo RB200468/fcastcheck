@@ -65,10 +65,16 @@
   .bubble-chart-wrapper {
     width: 100%;
     height: 100%;
-    margin: 15px 0px;
+    margin: 10px 0px;
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  .interval-chart-wrapper {
+    width: 100%;
+    height: 100%;
+    margin: 10px 0px;
   }
   
 

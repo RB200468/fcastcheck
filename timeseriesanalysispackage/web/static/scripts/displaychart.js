@@ -38,6 +38,7 @@ function buildChart(ctx, chartData){
         datasets: chartData.datasets
     };
 
+    const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
     const config = {
         type: 'line',
         data: timeSeriesData,
