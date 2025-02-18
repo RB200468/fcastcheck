@@ -8,11 +8,11 @@ function setupGraph() {
 
     // Select the container and get its dimensions
     const container = d3.select("#heatmapChart");
+    container.select("*").remove();
+    
     const width = container.node().clientWidth - margin.left - margin.right;
     const height = container.node().clientHeight - margin.top - margin.bottom;
 
-    // Clear any existing content before adding new content
-    container.select("svg").remove();
 
     // Append SVG to the container
     const svg = container.append("svg")
@@ -61,9 +61,3 @@ function setupGraph() {
             .style("fill", function(d) { return myColor(d.value); });
     });
 }
-
-
-// Redraw the graph when the window is resized
-window.onresize = function() {
-    setupGraph();
-};
