@@ -30,7 +30,7 @@
   }
 
   .grid-item.forecast {
-    border: 1.5px solid var(--txt-color-1);
+    border: 1.5px solid var(--bg-color-2);
     border-radius: 5px;
     grid-column: auto/span 1;
     grid-row: auto/span 1;
@@ -42,6 +42,10 @@
   .forecast-form-wrapper {
     height: 100%;
     width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
   }
 
   .forecast-btn {
@@ -49,7 +53,7 @@
     width: fit-content;
     height: fit-content;
     padding: 4px 8px;
-    color: var(--txt-color-1);
+    color: var(--txt-color-2);
     background-color: var(--bg-color-2);
   }
 
@@ -96,15 +100,15 @@
     }
   
     .grid-item.chart {
-      grid-column: auto/span 9;
+      grid-column: auto/span 11;
       grid-row: auto/span 4;
-      padding: 50px 20px;
+      padding: 25px 5px;
     }
   
     .grid-item.forecast {
-      grid-column: auto/span 3;
+      grid-column: auto/span 1;
       grid-row: auto/span 4;
-      padding: 20px 15px;
+      padding: 10px 15px;
     }
   
     .grid-item.analysis {
@@ -113,13 +117,7 @@
     }
   }
 
-  @media (min-width: 993px) {
-    .grid-item.forecast {
-      grid-column: auto/span 3;
-      grid-row: auto/span 4;
-      padding: 20px 50px;
-    }
-  }
+ 
 
 
 
