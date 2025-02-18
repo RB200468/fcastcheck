@@ -61,3 +61,7 @@ function setupGraph() {
             .style("fill", function(d) { return myColor(d.value); });
     });
 }
+
+window.onresize = function() {
+    setupGraph();
+};
