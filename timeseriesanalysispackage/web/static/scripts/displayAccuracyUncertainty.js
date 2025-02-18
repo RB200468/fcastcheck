@@ -47,6 +47,7 @@ function buildBubbleChart(ctx, chartData){
         data: { datasets: chartData },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: {
                 tooltip: {
                     callbacks: {
@@ -63,7 +64,6 @@ function buildBubbleChart(ctx, chartData){
                     title: { display: true, text: 'MSIS (Lower is Better)' },
                     min: 0,
                     max: 1,
-                    ticks: { stepSize: 0.1 },
                     grid: { color: txt_color_2_dark },
                     border: { color: txt_color_1, width: 1.25 }
                 },
