@@ -80,12 +80,15 @@
   .heatmap-chart-wrapper {
     width: 100%;
     height: 100%;
-    margin: 10px 0px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
   }
   
   #heatmapChart {
-    width: 100%;
-    height: 100%;
+    width: 98%;
+    height: 98%;
   }
 
   @media (min-width: 577px) {
