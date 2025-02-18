@@ -1,7 +1,7 @@
 import json
 class Chart:
     def __init__(self, timeLabels, yData, yTitle=None, dataLabel=None):
-            self.__labels = timeLabels
+            self.__labels = list(map(str, timeLabels)) # Time Labels are Strings Temporarily
             self.__data = yData
             self.__label = dataLabel if dataLabel else ""
             self.__title = yTitle if yTitle else ""
