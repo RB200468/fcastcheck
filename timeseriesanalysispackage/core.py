@@ -74,7 +74,8 @@ def get_forecast(name: str):
         return JSONResponse(content={'content': "Forecast time spread error"})
 
     # Fit and predict each model
-    training_data = current_chart_labels[0:start_date_index]
+    current_chart_data = current_chart.get('datasets')[0].get('data')
+    training_data = current_chart_data[0:start_date_index]
     for i in range(len(current_models)):
         current_model = current_models[i]()
         current_model.fit(data=training_data)
