@@ -97,53 +97,6 @@ def get_forecast(name: str):
     return JSONResponse(content={'content': current_forecast.chart}, status_code=200)
 
 
-
-
-
-
-@app.put("/forecast")
-def put_forecast(chart: str,model: str, start: int, steps: int, name: str):
-    if not chart in registered_charts.keys():
-        return JSONResponse(content={'content': "Chart Not Found."}, status_code=404)
-    elif not model in registered_models.keys():
-        return JSONResponse(content={'content': "Model Not Found"}, status_code=404)
-    
-    # Get Data
-    current_chart = registered_charts.get(chart)
-    current_model_class = registered_models.get(model)
-    current_data = current_chart['datasets'][0].get('data')
-    current_model = current_model_class()
-
-    # Train and Predict
-    pred_data = [None] * start
-    pred_data.append(current_data[start])
-    current_model.fit(data=current_data[:(start+1)])
-    pred_data.extend(current_model.predict(steps=steps))
-
-    #Update Labels
-    current_labels_length = len(current_chart['labels'])
-    forecast_data_length = len(pred_data)
-    new_labels_num = max(0, (forecast_data_length - current_labels_length))
-    new_labels = []
-    for i in range(current_labels_length, current_labels_length + new_labels_num):
-        new_labels.append(f"Point {i}")
-    current_chart['labels'].extend(new_labels)
-
-    # Add forecast line
-    line_colour = random_hex_colour()
-
-    forecast_line = {
-        "label": name,
-        "data": pred_data,
-        "borderColor": line_colour,
-        "backgroundColor": line_colour,
-        "borderDash": [5,5]
-    }
-    current_chart["datasets"].append(forecast_line)
-
-    return JSONResponse(content={'content': chart}, status_code=200)
-
-
 def get_user_data(filepath):
     """Search user script for chart types and forecasting models"""
 
