@@ -6,12 +6,12 @@ from fastapi.staticfiles import StaticFiles
 from inspect import isclass
 from .chart import Chart
 from .forecasting import ForecastingModel, Forecast
-from .utils import random_hex_colour
+from .utils import random_hex_colour, calc_pred_interval
 
 
 app = FastAPI()
 
-# Contains JSON Objects
+# Data
 registered_charts = {}
 registered_models = {}
 registered_forecasts = {}
@@ -22,6 +22,7 @@ templates = Jinja2Templates(directory=templatesDir)
 
 staticDir = os.path.join(os.path.dirname(__file__), 'web', 'static')
 app.mount("/static", StaticFiles(directory=staticDir))
+
 
 # Endpoints
 @app.get("/", response_class=HTMLResponse)
@@ -36,6 +37,7 @@ def home(request:Request):
     }
     return templates.TemplateResponse("index.jinja2", context)
 
+
 @app.get("/chart")
 def get_chart(name: str):
     if name in registered_charts.keys():
@@ -48,6 +50,7 @@ def get_chart(name: str):
     else:
         return JSONResponse(content={'content': "Chart not found"})
     
+
 @app.get("/forecast")
 def get_forecast(name: str):
     if name not in registered_forecasts.keys():
@@ -61,11 +64,24 @@ def get_forecast(name: str):
     current_chart["datasets"] = [current_chart["datasets"][0]]
 
     # Add pre-computed forecast lines
-    forecasts = forecast_lines.get(current_chart_name).get(name)
+    forecasts = forecast_lines.get(current_chart_name).get(name).get('lines')
     for forecast in forecasts:
         current_chart['datasets'].append(forecast)
 
     return JSONResponse(content={'content': current_chart_name}, status_code=200)
+
+
+@app.get("/predictionInterval")
+def get_predInterval(name: str):
+    if name not in registered_forecasts.keys():
+        return JSONResponse(content={'content': "Forecast not found"})
+    
+    current_forecast = registered_forecasts[name]
+    current_chart_name = current_forecast.get_chart()
+
+    predIntervals = forecast_lines[current_chart_name][name].get('metrics').get('predIntervals')[0] # Only getting the first one right now
+
+    return JSONResponse(content={'content': predIntervals}, status_code=200)
 
 
 def get_user_data(filepath):
@@ -126,7 +142,12 @@ def load_forecasts():
         if forecast in forecast_lines.get(chart_key).keys():
             return "ERROR: Only Unique Forecast Names Allowed"
 
-        forecast_lines[current_forecast.get_chart()][forecast] = []
+        forecast_lines[current_forecast.get_chart()][forecast] = {
+            'lines' : [],
+            'metrics' : {
+                'predIntervals': []
+            }
+        }
 
         # Validate forecast spread and calculate required steps
         current_chart_labels = current_chart.get('labels')
@@ -141,12 +162,18 @@ def load_forecasts():
         current_chart_data = current_chart.get('datasets')[0].get('data')
         training_data = current_chart_data[0:start_date_index]
         for i in range(len(current_models)):
+            '''Fit and Predict Model'''
             current_model = current_models[i]()
             current_model.fit(data=training_data)
             current_prediction = [None] * len(training_data)
             current_prediction.extend(current_model.predict(steps=steps))
-            line_color = random_hex_colour()
 
+            ground_truth_data = current_chart_data[start_date_index : end_date_index+1]
+            ground_truth_labels = current_chart_labels[start_date_index: end_date_index+1]
+
+
+            '''Build Prediction Chart'''
+            line_color = random_hex_colour()
             current_forecast_line = {
                 "label": current_forecast.get_models()[i],
                 "data": current_prediction,
@@ -154,9 +181,21 @@ def load_forecasts():
                 "backgroundColor": line_color,
                 "borderDash": [5,5]
             }
-            forecast_lines[current_forecast.get_chart()][forecast].append(current_forecast_line)
-        
+            forecast_lines[current_forecast.get_chart()][forecast].get('lines').append(current_forecast_line)
+
+
+            '''Build Prediction Interval Chart'''
+            prediction_interval_chart = calc_pred_interval(
+                ground_truth_labels=ground_truth_labels,
+                ground_truth_data=ground_truth_data,
+                predictions=current_prediction[start_date_index::],
+                line_color=line_color,
+                interval=0.95
+            )
+            forecast_lines[current_forecast.get_chart()][forecast].get('metrics').get('predIntervals').append(prediction_interval_chart)
+
     return "Forecasts Loaded"
+
 
 def main():
     if (len(sys.argv) != 3 or sys.argv[1] != "run"):
