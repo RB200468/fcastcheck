@@ -1,4 +1,4 @@
-document.addEventListener("forecastsChanged", () => {
+document.addEventListener("forecastClicked", (event) => {
         // Destroy old Canvas
         const container = document.getElementById('bubble-chart-wrapper');
         const oldCanvas = document.getElementById('bubbleChart');

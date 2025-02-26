@@ -1,86 +1,58 @@
-document.addEventListener("forecastsChanged", () => {
+document.addEventListener("forecastClicked", (event) => {
+    const forecast = event.detail;
+    console.log(forecast)
 
-    // Destroy old Canvas
-    const container = document.getElementById('interval-chart-wrapper');
-    const oldCanvas = document.getElementById('intervalChart');
-    container.removeChild(oldCanvas);
+    fetch(`http://localhost:8001/predictionInterval?name=${forecast}`)
+        .then(response => {
+            if (!response.ok) {
+                throw Error("Error Occured ", response.statusText)
+            }
+            return response.json();
+        })
+        .then (data => {
+            // Destroy old Canvas
+            const container = document.getElementById('interval-chart-wrapper');
+            const oldCanvas = document.getElementById('intervalChart');
+            container.removeChild(oldCanvas);
 
-    // Create new Canvas
-    const newCanvas = document.createElement('canvas');
-    newCanvas.id = 'intervalChart';
-    newCanvas.ariaLabel = 'intervalChart';
-    newCanvas.role = 'svg';
-    container.appendChild(newCanvas);
+            // Create new Canvas
+            const newCanvas = document.createElement('canvas');
+            newCanvas.id = 'intervalChart';
+            newCanvas.ariaLabel = 'intervalChart';
+            newCanvas.role = 'svg';
+            container.appendChild(newCanvas);
 
-    // Generate mock forecast data (replace with actual values)
-    const forecastSteps = 20;
-    const forecastDates = Array.from({ length: forecastSteps }, (_, i) => {
-        let date = new Date();
-        date.setDate(date.getDate() + i);
-        return date.toISOString().split('T')[0]; // Format as YYYY-MM-DD
-    });
-
-    const forecastMean = Array.from({ length: forecastSteps }, (_, i) => 50 + i + (Math.random() * 2 - 1));
-    const confIntLower = forecastMean.map(value => value - 1.5);
-    const confIntUpper = forecastMean.map(value => value + 1.5);
-    const predIntLower = forecastMean.map(value => value - 2);
-    const predIntUpper = forecastMean.map(value => value + 2);
-
-    const data = [
-        {
-            label: 'Forecast',
-            data: forecastMean,
-            borderColor: '#0069C3',
-            borderWidth: 2,
-            fill: false,
-        },
-        {
-            label: 'Confidence Interval (95%)',
-            data: confIntUpper,
-            borderColor: '#004C8C',
-            borderWidth: 0,
-            backgroundColor: 'rgba(0,76,140,0.3)',
-            fill: '-1',
-        },
-        {
-            label: '',
-            data: confIntLower,
-            borderColor: '#004C8C',
-            borderWidth: 0,
-            backgroundColor: 'rgba(0,76,140,0.3)',
-            fill: '-1',
-        },
-        {
-            label: 'Prediction Interval (95%)',
-            data: predIntUpper,
-            borderColor: '#3395D6',
-            borderWidth: 0,
-            backgroundColor: 'rgba(51,149,214,0.2)',
-            fill: '-1',
-        },
-        {
-            label: '',
-            data: predIntLower,
-            borderColor: '#3395D6',
-            borderWidth: 0,
-            backgroundColor: 'rgba(51,149,214,0.2)',
-            fill: '-1',
-        }
-    ]
-
-    const ctx = newCanvas.getContext('2d');
-    intervalChart = buildIntervalChart(ctx,data,forecastDates);
-
+            // Update New Canvas
+            const ctx = newCanvas.getContext('2d');
+            intervalChart = buildIntervalChart(ctx,data.content);
+        })
+        .catch (error => {
+            console.error("Error: ", error)
+        });
 })
 
-function buildIntervalChart(ctx, data, forecastDates) {
-
+function buildIntervalChart(ctx, data) {
     const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
+
+    const paddingFactor = 0.25; // 10% padding
+
+    const allDataPoints = data.datasets.flatMap(dataset => dataset.data);
+    const minY = Math.min(...allDataPoints);
+    const maxY = Math.max(...allDataPoints);
+
+    // Calculate dynamic padding
+    const range = maxY - minY;
+    const padding = range * paddingFactor;
+
+    // Adjusted axis limits
+    const suggestedMin = minY - padding;
+    const suggestedMax = maxY + padding;
+
     const config = {
         type: 'line',
         data: {
-            labels: forecastDates,
-            datasets: data
+            labels: data.labels,
+            datasets: data.datasets
         },
         options: {
             responsive: true,
@@ -104,7 +76,9 @@ function buildIntervalChart(ctx, data, forecastDates) {
                         text: 'Value'
                     },
                     grid: { color: txt_color_2_dark },
-                    border: { color: txt_color_1, width: 1.25 }
+                    border: { color: txt_color_1, width: 1.25 },
+                    suggestedMin: suggestedMin,
+                    suggestedMax: suggestedMax
                 }
             },
             plugins: {
