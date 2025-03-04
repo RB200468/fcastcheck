@@ -39,6 +39,7 @@
         <div id="interval-chart-wrapper" class="interval-chart-wrapper">
             <canvas id="intervalChart"></canvas>
         </div>
+        <div id="dot-container"></div>
     </div>
 </div>
 <script>
@@ -56,23 +57,22 @@
             div.classList.add("forecast-btn");
             div.textContent = forecast;
 
-            div.addEventListener("click", () => {
+            div.addEventListener("click", async () => {
                 // Remove "active" class from all forecast divs
                 document.querySelectorAll(".forecast-btn").forEach(btn => btn.classList.remove("active"));
                 div.classList.add('active');
 
                 // Write Forecast Lines
-                fetch(`http://localhost:8001/forecast?name=${forecast}`)
+                await fetch(`http://localhost:8001/forecast?name=${forecast}`)
                     .then(response => {
                         return response.json()
                     }).then(responseJSON => {
-                        console.log(responseJSON);
                         document.dispatchEvent(new CustomEvent("activeChartChanged", { detail: responseJSON.content }));
                     }).catch(error => {
                         console.error("Error ", error);
                     })
+                document.dispatchEvent(new CustomEvent("forecastClicked", { detail: forecast }))
             });
-
             container.appendChild(div);
         });
     });

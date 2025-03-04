@@ -1,5 +1,5 @@
 import pytest, sys
-from timeseriesanalysispackage.core import main
+from fcastcheck.core import main
 from io import StringIO
 from unittest.mock import patch
 

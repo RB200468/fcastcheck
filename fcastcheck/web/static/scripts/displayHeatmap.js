@@ -1,4 +1,4 @@
-document.addEventListener("forecastsChanged", () => {
+document.addEventListener("forecastClicked", (event) => {
     setupGraph();
 })
 
