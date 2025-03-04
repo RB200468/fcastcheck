@@ -24,7 +24,38 @@ document.addEventListener("forecastClicked", (event) => {
 
             // Update New Canvas
             const ctx = newCanvas.getContext('2d');
-            intervalChart = buildIntervalChart(ctx,data.content);
+            intervalChart = buildIntervalChart(ctx,data.content[0]);
+
+
+            // Create Model Selector Dots
+            let currentIndex = 0;
+            const dotsContainer = document.getElementById('dot-container');
+            dotsContainer.replaceChildren();
+
+            function updateChart(index) {
+                currentIndex = index;
+                intervalChart.destroy();
+                intervalChart = buildIntervalChart(ctx, data.content[currentIndex])
+                console.log(data.content[currentIndex]);
+                updateActiveDot();
+            }
+        
+            function updateActiveDot() {
+                document.querySelectorAll(".dot").forEach((dot, i) => {
+                    dot.classList.toggle("active", i === currentIndex);
+                });
+            }
+        
+            data.content.forEach((_, index) => {
+                const dot = document.createElement("div");
+                dot.classList.add("dot");
+                if (index === currentIndex) dot.classList.add("active");
+                dot.addEventListener("click", () => updateChart(index));
+                dotsContainer.appendChild(dot);
+            });
+
+
+
         })
         .catch (error => {
             console.error("Error: ", error)
@@ -61,11 +92,13 @@ function buildIntervalChart(ctx, data) {
                 x: {
                     title: {
                         display: true,
-                        text: 'Date'
+                        text: 'Date',
+                        color: txt_color_1
                     },
                     ticks: {
                         maxRotation: 45,
-                        minRotation: 45
+                        minRotation: 45,
+                        color: txt_color_1
                     },
                     grid: { color: txt_color_2_dark },
                     border: { color: txt_color_1, width: 1.25 }
@@ -73,8 +106,10 @@ function buildIntervalChart(ctx, data) {
                 y: {
                     title: {
                         display: true,
-                        text: 'Value'
+                        text: 'Value',
+                        color: txt_color_1
                     },
+                    ticks: {color: txt_color_1},
                     grid: { color: txt_color_2_dark },
                     border: { color: txt_color_1, width: 1.25 },
                     suggestedMin: suggestedMin,
@@ -84,6 +119,7 @@ function buildIntervalChart(ctx, data) {
             plugins: {
                 legend: {
                     display: true,
+                    labels:{color: txt_color_1}
                 }
             }
         }

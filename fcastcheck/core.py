@@ -79,7 +79,7 @@ def get_predInterval(name: str):
     current_forecast = registered_forecasts[name]
     current_chart_name = current_forecast.get_chart()
 
-    predIntervals = forecast_lines[current_chart_name][name].get('metrics').get('predIntervals')[0] # Only getting the first one right now
+    predIntervals = forecast_lines[current_chart_name][name].get('metrics').get('predIntervals')
 
     return JSONResponse(content={'content': predIntervals}, status_code=200)
 
