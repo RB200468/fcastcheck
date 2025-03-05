@@ -1,4 +1,4 @@
-import sys, importlib.util, uvicorn, os, json, random
+import sys, importlib.util, uvicorn, os
 from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -26,9 +26,7 @@ app.mount("/static", StaticFiles(directory=staticDir))
 
 # Endpoints
 @app.get("/", response_class=HTMLResponse)
-def home(request:Request):
-    """Render Home Screen"""
-    global registered_charts
+def get_root(request:Request) -> HTMLResponse:
     context= {
         'request': request,
         'charts': list(registered_charts.keys()),
@@ -39,7 +37,7 @@ def home(request:Request):
 
 
 @app.get("/chart")
-def get_chart(name: str):
+def get_chart(name: str) -> JSONResponse:
     if name in registered_charts.keys():
         current_forecasts=[]
         for forecast_name in list(registered_forecasts.keys()):
@@ -52,7 +50,7 @@ def get_chart(name: str):
     
 
 @app.get("/forecast")
-def get_forecast(name: str):
+def get_forecast(name: str) -> JSONResponse:
     if name not in registered_forecasts.keys():
         return JSONResponse(content={'content': "Forecast not found"})
     
@@ -72,7 +70,7 @@ def get_forecast(name: str):
 
 
 @app.get("/predictionInterval")
-def get_predInterval(name: str):
+def get_predInterval(name: str) -> JSONResponse:
     if name not in registered_forecasts.keys():
         return JSONResponse(content={'content': "Forecast not found"})
     
@@ -84,7 +82,7 @@ def get_predInterval(name: str):
     return JSONResponse(content={'content': predIntervals}, status_code=200)
 
 
-def get_user_data(filepath):
+def get_user_data(filepath: str) -> None:
     """Search user script for chart types and forecasting models"""
 
     global registered_charts, registered_models
@@ -103,10 +101,12 @@ def get_user_data(filepath):
             """Checks for Chart objects"""
             registered_charts[attr_name] = attr_value.getChartData()
             print(f'Successfully added chart: {attr_name}')
+
         elif isclass(attr_value) and issubclass(attr_value, ForecastingModel) and attr_name != 'ForecastingModel':
             """Checks for ForecastingModel subclasses"""
             registered_models[attr_name] = attr_value
             print(f'Successfully added model: {attr_name}')
+
         elif isinstance(attr_value, Forecast):
             """Checks for Forecast Objects"""
             registered_forecasts[attr_name] = attr_value
@@ -119,30 +119,31 @@ def get_user_data(filepath):
         print("No Forecasting Models found in the user's script.'")
 
 
-def load_forecasts():
+def load_forecasts() -> str:
     for forecast in registered_forecasts.keys():
         current_forecast = registered_forecasts[forecast]
 
-        if current_forecast.get_chart() not in registered_charts.keys():
-            print(current_forecast.get_chart())
-            return "ERROR: Chart Not Found"
-        current_chart = registered_charts[current_forecast.get_chart()]
+        current_forecast_chart = current_forecast.get_chart()
+        if current_forecast_chart not in registered_charts.keys():
+            print(current_forecast_chart)
+            raise ValueError("ERROR: Chart Not Found")
+        current_chart = registered_charts[current_forecast_chart]
+        
 
         current_models = []
         for model in current_forecast.get_models():
             if model not in registered_models.keys():
-                return "ERROR: Model Not Found"
+                raise ValueError("ERROR: Model Not Found")
             current_models.append(registered_models[model])
 
 
-        chart_key = current_forecast.get_chart()
-        if chart_key not in forecast_lines.keys():
-            forecast_lines[chart_key] = {}
+        if current_forecast_chart not in forecast_lines.keys():
+            forecast_lines[current_forecast_chart] = {}
 
-        if forecast in forecast_lines.get(chart_key).keys():
-            return "ERROR: Only Unique Forecast Names Allowed"
+        if forecast in forecast_lines.get(current_forecast_chart).keys():
+            raise ValueError("ERROR: Only Unique Forecast Names Allowed")
 
-        forecast_lines[current_forecast.get_chart()][forecast] = {
+        forecast_lines[current_forecast_chart][forecast] = {
             'lines' : [],
             'metrics' : {
                 'predIntervals': []
@@ -155,13 +156,13 @@ def load_forecasts():
         end_date_index = current_chart_labels.index(current_forecast.get_end_time())
         steps = (end_date_index - start_date_index) + 1
         if ((start_date_index >= end_date_index) or (start_date_index == 0)):
-            return "ERROR: Invalid Forecast Time Spread"
+            raise ValueError("ERROR: Invalid Forecast Time Spread")
         
 
         # Fit and predict each model
         current_chart_data = current_chart.get('datasets')[0].get('data')
         training_data = current_chart_data[0:start_date_index]
-        for i in range(len(current_models)):
+        for i,_ in enumerate(current_models):
             '''Fit and Predict Model'''
             current_model = current_models[i]()
             current_model.fit(data=training_data)
@@ -172,7 +173,7 @@ def load_forecasts():
             ground_truth_labels = current_chart_labels[start_date_index: end_date_index+1]
 
 
-            '''Build Prediction Chart'''
+            '''Build Prediction Line Chart'''
             line_color = random_hex_colour()
             current_forecast_line = {
                 "label": current_forecast.get_models()[i],
@@ -181,7 +182,7 @@ def load_forecasts():
                 "backgroundColor": line_color,
                 "borderDash": [5,5]
             }
-            forecast_lines[current_forecast.get_chart()][forecast].get('lines').append(current_forecast_line)
+            forecast_lines[current_forecast_chart][forecast].get('lines').append(current_forecast_line)
 
 
             '''Build Prediction Interval Chart'''
@@ -192,9 +193,9 @@ def load_forecasts():
                 line_color=line_color,
                 interval=0.95
             )
-            forecast_lines[current_forecast.get_chart()][forecast].get('metrics').get('predIntervals').append(prediction_interval_chart)
+            forecast_lines[current_forecast_chart][forecast].get('metrics').get('predIntervals').append(prediction_interval_chart)
 
-    return "Forecasts Loaded"
+    print("Forecasts Loaded")
 
 
 def main():
@@ -206,9 +207,17 @@ def main():
 
     try:
         get_user_data(user_script)
-        print(load_forecasts())
-    except Exception as e:
-        print(f"Error getting chart: {e}")
+        load_forecasts()
+    except Exception as ex:
+        print(f"Error: [{ex}]")
+        sys.exit(1)
+    except ValueError as ve:
+        print(f"Value Error: [{ve}]")
         sys.exit(1)
 
+
     uvicorn.run(app, host="localhost", port=8001)
+
+
+if __name__ == "__main__":
+    main()
