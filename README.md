@@ -1,14 +1,16 @@
-# Final Year Computer Science Project
-
-By Ryan Bendall | University of Birmingham
+# Fcastcheck
 
 # Contents
 
+- [Fcastcheck](#fcastcheck)
+- [Contents](#contents)
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Usage](#usage)
-  - [Chart](##chart)
-  - [Forecasting](##forecasting)
+	- [Chart](#chart)
+	- [Forecasting Models](#forecasting-models)
+	- [Forecasts](#forecasts)
+- [3rd-Party Package Support](#3rd-party-package-support)
 
 # Introduction
 
@@ -16,82 +18,51 @@ This project is a python package which allows users to analyse their own time-se
 
 # Installation
 
-Clone the repository
+Install the library from PyPI
 
-```
-git clone https://github.com/RB200468/timeSeriesAnalysisPackage
-```
-
-Make sure poetry is installed
-
-```
-pipx install poetry
-poetry --version
-```
-
-Install the package locally
-
-```
-poetry install
-```
-
-Enter the virtual environment and use the package!
-
-```
-poetry shell
-```
-
-Exiting the poetry shell
-
-```
-exit
+``` bash
+pip install fcastcheck
 ```
 
 # Usage
+Fcastcheck provides a framework for you to define your time-series charts, models and forecasts.
 
 To use the package enter this command into your terminal
 
-```
-timeseriesanalysispackage run <user_script.py>
+``` bash
+fcastcheck run <user_script.py>
 ```
 
 ## Chart
-
+To define your chart, you must import it as follows
 ```
-from timeseriesanalysispackage.chart import Chart
+from fcastcheck.chart import Chart
 ```
 
 Create chart objects to use in your analysis
 
-```
+``` python
 my_chart = Chart(
-		timeLabels = ['January', 'Feburary', 'March', 'April', 'May'],
-		yData = [10,15,25,45,20],
-		yTitle = "Sales Figures (in Millions USD)",
-		dataLabel = 'Apples'
+		timeLabels: List[str],
+		yData: List[int] | List[float] ,
+		yTitle: str,
+		dataLabel: str
 	)
 ```
 
 you can add options to your chart to make it more bespoke
 
-```
-my_chart = Chart(
-		timeLabels = ['January', 'Feburary', 'March', 'April', 'May'],
-		yData = [10,15,25,45,20],
-		yTitle = "Sales Figures (in Millions USD)",
-		dataLabel = 'Apples'
-	)
-
+``` python
 my_chart.options(
-		tension = 0.1,
-		borderColor = 'rgba(250, 220, 122, 1)',
-		fill = False
+		tension: float | None,
+		borderColor: str | None,
+		fill: bool | None
 	)
 ```
 
 The default options are as follows:
 
-```
+```python
 default_options.options(
 		tension = 0.3,
 		borderColor = '#0069C3',
@@ -99,17 +70,16 @@ default_options.options(
 	)
 ```
 
-## Forecasting
-
-```
-from timeseriesanalysispackage.forecasting import ForecastingModel
-```
-
+## Forecasting Models
 This allows you to import your forecasting models into the application.
 
-To add your forecasting models you must write your own implementations of the base interface
-
+```python
+from fcastcheck.forecasting import ForecastingModel
 ```
+
+To add your forecasting models you must write your own implementations of the `ForecastingModel` interface
+
+```python
 class ForecastingModel:
     def fit(self, data: list) -> None:
 		"""Funciton for training model on the data"""
@@ -122,7 +92,7 @@ class ForecastingModel:
 
 Here's an example:
 
-```
+```python
 class MyModel(ForecastingModel):
 	def __init__(self):
 		self.model = None
@@ -137,40 +107,25 @@ class MyModel(ForecastingModel):
 		return prediction_data
 ```
 
-# Examples
+## Forecasts
+You can import the forecast class as follows
 
-An example `user_script.py`
-
+```python
+from fcastcheck.Forecasting import Forcast
 ```
-from timeseriesanalysispackage.chart import Chart
-from timeseriesanalysispackage.forecasting import ForecastingModel
 
+Now you can define which models you want to use on which charts and the time frame you wish to predict.
 
-my_chart = Chart(
-		timeLabels = ['January', 'Feburary', 'March', 'April', 'May'],
-		yData = [10,15,25,45,20],
-		yTitle = "Sales Figures (in Millions USD)",
-		dataLabel = 'Apples'
-	)
-
-my_chart.options(
-		tension = 0.1,
-		borderColor = '#60B6E4'
-	)
-
-class MyModel(ForecastingModel):
-	def __init__(self):
-		self.model = None
-
-	def fit(self, data: list):
-		print('fitting data')
-		self.model = data
-
-	def predict(self, steps: int):
-		prediction_data = []
-		print('predicting...')
-		for i in range(len(self.model)):
-			prediction_data.append(self.model[i] * 2)
-		return prediction_data
-
+```python
+my_forecast = Forecast(
+	chart_name: str,
+	models: List[str],
+	start_time: str,
+	end_time: str
+)
 ```
+
+# 3rd-Party Package Support
+You are able to include some 3rd party packages as part of your model evaluation pipeline:
+`pandas`, `numpy`, `scikit-learn`, `statsmodels`, `scipy`
+Over time there will be wider 3rd-party package support.
