@@ -1,35 +1,37 @@
-document.addEventListener("activeChartChanged", (event) => {
-    console.log("Active Chart Name: ", event.detail);
+document.addEventListener("activeChartChanged", async (event) => {
     const chartName = event.detail;
+    console.log(`Active Chart Name: ${chartName}`);
 
-    fetch(`http://localhost:8001/chart?name=${chartName}`)
-        .then(response => {
-            if (!response.ok) {
-                throw Error("Error Occured ", response.statusText)
-            }
-            return response.json();
-        })
-        .then (data => {
-            // Destroy old Canvas
-            const container = document.getElementById('canvas-container');
-            const oldCanvas = document.getElementById('Chart');
-            container.removeChild(oldCanvas);
+    try {
+        const response = await fetch(`http://localhost:8001/chart?name=${chartName}`);
 
-            // Create New Canvas
-            const newCanvas = document.createElement('canvas');
-            newCanvas.id = 'Chart';
-            newCanvas.ariaLabel = 'Chart';
-            newCanvas.role = 'svg';
-            container.appendChild(newCanvas);
+        if (!response.ok) {
+            throw Error(`Error: ${response.statusText}`);
+        }
 
-            // Update New Canvas
-            const ctx = newCanvas.getContext('2d');
-            builtChart = buildChart(ctx, data.content);
-            document.dispatchEvent(new CustomEvent("forecastsChanged", { detail: data.forecasts }));
-        })
-        .catch (error => {
-            console.error("Error: ", error)
-        });
+        const data = await response.json();
+
+        // Destroy old Canvas
+        const container = document.getElementById('canvas-container');
+        const oldCanvas = document.getElementById('Chart');
+        container.removeChild(oldCanvas);
+
+        // Create New Canvas
+        const newCanvas = document.createElement('canvas');
+        newCanvas.id = 'Chart';
+        newCanvas.ariaLabel = 'Chart';
+        newCanvas.role = 'svg';
+        container.appendChild(newCanvas);
+
+        // Update New Canvas
+        const ctx = newCanvas.getContext('2d');
+        builtChart = buildChart(ctx, data.content);
+
+        document.dispatchEvent(new CustomEvent("forecastsChanged", { detail: data.forecasts }));
+
+    } catch (error) {
+        console.error(`Error: ${error}`);
+    }
 });
 
 function buildChart(ctx, chartData){

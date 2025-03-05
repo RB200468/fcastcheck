@@ -1,65 +1,64 @@
-document.addEventListener("forecastClicked", (event) => {
+document.addEventListener("forecastClicked", async (event) => {
     const forecast = event.detail;
     console.log(forecast)
 
-    fetch(`http://localhost:8001/predictionInterval?name=${forecast}`)
-        .then(response => {
-            if (!response.ok) {
-                throw Error("Error Occured ", response.statusText)
-            }
-            return response.json();
-        })
-        .then (data => {
-            // Destroy old Canvas
-            const container = document.getElementById('interval-chart-wrapper');
-            const oldCanvas = document.getElementById('intervalChart');
-            container.removeChild(oldCanvas);
-
-            // Create new Canvas
-            const newCanvas = document.createElement('canvas');
-            newCanvas.id = 'intervalChart';
-            newCanvas.ariaLabel = 'intervalChart';
-            newCanvas.role = 'svg';
-            container.appendChild(newCanvas);
-
-            // Update New Canvas
-            const ctx = newCanvas.getContext('2d');
-            intervalChart = buildIntervalChart(ctx,data.content[0]);
-
-
-            // Create Model Selector Dots
-            let currentIndex = 0;
-            const dotsContainer = document.getElementById('dot-container');
-            dotsContainer.replaceChildren();
-
-            function updateChart(index) {
-                currentIndex = index;
-                intervalChart.destroy();
-                intervalChart = buildIntervalChart(ctx, data.content[currentIndex])
-                console.log(data.content[currentIndex]);
-                updateActiveDot();
-            }
+    try {
+        const response = await fetch(`http://localhost:8001/predictionInterval?name=${forecast}`)
         
-            function updateActiveDot() {
-                document.querySelectorAll(".dot").forEach((dot, i) => {
-                    dot.classList.toggle("active", i === currentIndex);
-                });
-            }
-        
-            data.content.forEach((_, index) => {
-                const dot = document.createElement("div");
-                dot.classList.add("dot");
-                if (index === currentIndex) dot.classList.add("active");
-                dot.addEventListener("click", () => updateChart(index));
-                dotsContainer.appendChild(dot);
+        if (!response.ok) {
+            throw Error(`Error:  ${response.statusText}`)
+        }
+
+        const data = await response.json();
+
+        // Destroy old Canvas
+        const container = document.getElementById('interval-chart-wrapper');
+        const oldCanvas = document.getElementById('intervalChart');
+        container.removeChild(oldCanvas);
+
+        // Create new Canvas
+        const newCanvas = document.createElement('canvas');
+        newCanvas.id = 'intervalChart';
+        newCanvas.ariaLabel = 'intervalChart';
+        newCanvas.role = 'svg';
+        container.appendChild(newCanvas);
+
+        // Update New Canvas
+        const ctx = newCanvas.getContext('2d');
+        intervalChart = buildIntervalChart(ctx,data.content[0]);
+
+
+        // Create Model Selector Dots
+        let currentIndex = 0;
+        const dotsContainer = document.getElementById('dot-container');
+        dotsContainer.replaceChildren();
+
+        function updateChart(index) {
+            currentIndex = index;
+            intervalChart.destroy();
+            intervalChart = buildIntervalChart(ctx, data.content[currentIndex])
+            console.log(data.content[currentIndex]);
+            updateActiveDot();
+        }
+    
+        function updateActiveDot() {
+            document.querySelectorAll(".dot").forEach((dot, i) => {
+                dot.classList.toggle("active", i === currentIndex);
             });
-
-
-
-        })
-        .catch (error => {
-            console.error("Error: ", error)
+        }
+        
+        // Handle selector dot creation, active class assignment and updateChart onClick
+        data.content.forEach((_, index) => {
+            const dot = document.createElement("div");
+            dot.classList.add("dot");
+            if (index === currentIndex) dot.classList.add("active");
+            dot.addEventListener("click", () => updateChart(index));
+            dotsContainer.appendChild(dot);
         });
+
+    } catch (error) {
+        console.error(`Error: ${error}}`);
+    }
 })
 
 function buildIntervalChart(ctx, data) {
