@@ -1,5 +1,4 @@
-import sys, importlib.util, uvicorn, os, math
-import numpy as np
+import sys, importlib.util, uvicorn, os
 
 from fastapi import FastAPI
 from fastapi.templating import Jinja2Templates
@@ -8,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from inspect import isclass
 from .chart import Chart
 from .forecasting import ForecastingModel, Forecast
-from .utils import random_hex_colour, calc_pred_interval
+from .utils import random_hex_colour, calc_pred_interval, calc_metrics 
 
 from .routes.chart import router as chart_router
 from .routes.forecast import router as forecast_router
@@ -18,6 +17,7 @@ from .routes.metrics import router as metrics_router
 
 
 app = FastAPI()
+
 
 # Data
 app.state.registered_charts = {}
@@ -157,56 +157,19 @@ def load_forecasts() -> str:
             )
             app.state.forecast_lines[current_forecast_chart][forecast].get('metrics').get('predIntervals').append(prediction_interval_chart)
 
+
             '''Get Data For Heatmap'''
             metrics = calc_metrics(current_prediction[start_date_index::], ground_truth_data)
             for key, value in metrics.items():
                 app.state.forecast_lines[current_forecast_chart][forecast].get('metrics').get(key).append(value)
 
-            #print(f"{len(app.state.forecast_lines[current_forecast_chart][forecast].get('metrics').get('RMSE'))}")
 
     print("Forecasts Loaded")
-
-def calc_metrics(predictions: list, groundTruth: list) -> dict:
-    mean_absolute_error = []
-    root_mean_Squared_error = []
-    mean_absolute_percentage_error = []
-    symmetric_mape = []
-    mean_absolute_scaled_error = []
-
-    for i,_ in enumerate(predictions):
-        mean_absolute_error.append(calc_mae(predictions[0:i+1], groundTruth[0:i+1]))
-        root_mean_Squared_error.append(calc_rmse(predictions[0:i+1], groundTruth[0:i+1]))
-        mean_absolute_percentage_error.append(calc_mape(predictions[0:i+1],groundTruth[0:i+1]))
-
-    metrics_dict = {
-        "MAE": mean_absolute_error,
-        "RMSE": root_mean_Squared_error,
-        "MAPE": mean_absolute_percentage_error
-    }
-
-    return metrics_dict
-
-def calc_mae(predictions: list, groundTruth: list) -> float:
-    # Mean Absolute Error
-    return abs(sum(i-j for i,j in zip(predictions, groundTruth))/len(predictions))
-
-def calc_rmse(predictions: list, groundTruth: list) -> float:
-    # Root Mean Squared Error
-    return math.sqrt(sum(pow(i-j,2) for i,j in zip(predictions, groundTruth))/len(predictions))
-
-def calc_mape(predictions: list, groundTruth: list) -> float:
-    # Mean Absolute Percentage Error
-    return abs(sum((100*(i-j))/i for i,j in zip(predictions, groundTruth))/len(predictions))
-
-def calc_smape(predictions: list, groundTruth: list) -> float:
-    ...
-
-def calc_mase(predictions: list, groundTruth: list) -> float:
-    ...    
 
 
 def main():
     if (len(sys.argv) != 3 or sys.argv[1] != "run"):
+        # TODO: Add flag for custom port number
         print("Usage: timeseriesanalysispackage run <user_script.py>")
         sys.exit(1)
 
