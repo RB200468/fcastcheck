@@ -1,0 +1,27 @@
+
+.forecast-form-wrapper {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    gap: 10px;
+}
+
+  .forecast-btn {
+    border-radius: 5px;
+    width: fit-content;
+    height: fit-content;
+    padding: 4px 8px;
+    color: var(--txt-color-2);
+    background-color: var(--bg-color-2);
+}
+
+  .forecast-btn.active,
+  .forecast-btn:hover{
+    cursor: pointer;
+    padding: 4px 10px;
+    background-color: var(--txt-color-1);
+    color: var(--bg-color-1);
+    transition: all 0.1s ease-in-out;
+}
