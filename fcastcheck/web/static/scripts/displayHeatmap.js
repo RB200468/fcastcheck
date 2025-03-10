@@ -9,17 +9,42 @@ document.addEventListener("forecastClicked", async (event) => {
         }
 
         const data = await response.json();
-        console.log(`RMSE: ${data.content.RMSE[0]}`);
-        console.log(`MAE: ${data.content.MAE[0]}`);
-        const rmse_data = data.content.RMSE[0]
-        const mae_data = data.content.MAE[0]
 
-        const heatmapData = data.content.labels.flatMap((t, i) => [
-            { group: t, variable: "RMSE", value: rmse_data[i] },
-            { group: t, variable: "MAE", value: mae_data[i] }
-        ]);
+        const lineCount = data.content.RMSE.length;
+        const timeLabels = data.content.labels
 
-        setupGraph(data.content.labels, heatmapData);
+         // Create Model Selector Dots
+         let currentIndex = 0;
+         const dotsContainer = document.getElementById('hm-dot-container');
+         dotsContainer.replaceChildren();
+         updateChart(0); // Initial Render
+ 
+         function updateChart(index) {
+             currentIndex = index;
+             const rmse_data = data.content.RMSE[currentIndex];
+             const mae_data = data.content.MAE[currentIndex];
+             const heatmapData = data.content.labels.flatMap((t, i) => [
+             { group: t, variable: "RMSE", value: rmse_data[i] },
+             { group: t, variable: "MAE", value: mae_data[i] }
+             ]);
+             setupGraph(timeLabels, heatmapData)
+             updateActiveDot();
+         }
+     
+         function updateActiveDot() {
+             document.querySelectorAll(".hm-dot").forEach((dot, i) => {
+                 dot.classList.toggle("active", i === currentIndex);
+             });
+         }
+         
+         // Handle selector dot creation, active class assignment and updateChart onClick
+         for (let i=0; i < lineCount; i++) {
+             const dot = document.createElement("div");
+             dot.classList.add("hm-dot");
+             if (i === currentIndex) dot.classList.add("active");
+             dot.addEventListener("click", () => updateChart(i));
+             dotsContainer.appendChild(dot);
+         };
     } catch (error) {
         console.error(`Error: ${error}`);
     }
@@ -35,7 +60,6 @@ function setupGraph(timeLabels, data) {
     
     const width = container.node().clientWidth - margin.left - margin.right;
     const height = container.node().clientHeight - margin.top - margin.bottom;
-
 
     // Append SVG to the container
     const svg = container.append("svg")
@@ -133,5 +157,5 @@ function setupGraph(timeLabels, data) {
 }
 
 window.onresize = function() {
-    setupGraph();
+    // Not implemented
 };
