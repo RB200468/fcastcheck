@@ -1,8 +1,5 @@
 <head>
     <script src="static/scripts/displaychart.js"></script>
-    <script src="static/scripts/displayAccuracyUncertainty.js"></script>
-    <script src="static/scripts/displayIntervalChart.js"></script>
-    <script src="static/scripts/displayHeatmap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="static/styles/dashboard.css">
 </head>
@@ -14,71 +11,15 @@
         </canvas>
     </div>
     <div class="grid-item forecast">
-        <div id="forecast-wrapper" class="forecast-form-wrapper">
-            <h1>Forecasts</h1>
-
-        </div>
+        {% include "forecast.jinja2" %}
     </div>
     <div class="grid-item analysis bubble">
-        <h3>Accuracy vs Uncertainty</h3>
-        <p>Lower is better</p>
-        <div id="bubble-chart-wrapper" class="bubble-chart-wrapper">
-            <canvas id="bubbleChart"></canvas>
-        </div>
+        {% include "bubbleChart.jinja2" %}
     </div>
     <div class="grid-item analysis heatmap">
-        <h3>Performance Metrics Over Time</h3>
-        <p>Lighter is better</p>
-        <div id="heatmap-chart-wrapper" class="heatmap-chart-wrapper">
-            <div id="heatmapChart"></div>
-        </div>
+        {% include "heatmapChart.jinja2" %}
     </div>
     <div class="grid-item analysis interval">
-        <h3>Prediction and Confidence Interval</h3>
-        <p>Smaller interval is better</p>
-        <div id="interval-chart-wrapper" class="interval-chart-wrapper">
-            <canvas id="intervalChart"></canvas>
-        </div>
-        <div id="dot-container"></div>
+        {% include "intervalChart.jinja2" %}
     </div>
 </div>
-<script>
-    // TODO: make sure the 'active forecast stays visible'
-    document.addEventListener("forecastsChanged", (event) => {
-        const current_forecasts = event.detail;
-        const container = document.getElementById('forecast-wrapper');
-
-        document.querySelectorAll('.forecast-btn').forEach(button => { button.remove() });
-
-        current_forecasts.forEach(forecast => {
-            // Create forecast div
-            const div = document.createElement("div");
-            div.classList.add("forecast-btn");
-            div.textContent = forecast;
-
-            div.addEventListener("click", async () => {
-                // Remove "active" class from all forecast divs
-                document.querySelectorAll(".forecast-btn").forEach(btn => btn.classList.remove("active"));
-                div.classList.add('active');
-
-                // Write Forecast Lines
-                try {
-                    const response = await fetch(`http://localhost:8001/forecast?name=${forecast}`);
-
-                    if (!response.ok) {
-                        throw Error(`Error: ${response.statusText}`);
-                    }
-
-                    const data = await response.json();
-
-                    document.dispatchEvent(new CustomEvent("activeChartChanged", { detail: data.content }));
-                    document.dispatchEvent(new CustomEvent("forecastClicked", { detail: forecast }))
-
-                } catch (error) {
-                    console.error(`Error: ${error}`);
-                }
-            });
-            container.appendChild(div);
-        });
-    });
-</script>

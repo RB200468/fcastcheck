@@ -7,15 +7,17 @@ from fastapi.staticfiles import StaticFiles
 from inspect import isclass
 from .chart import Chart
 from .forecasting import ForecastingModel, Forecast
-from .utils import random_hex_colour, calc_pred_interval
+from .utils import random_hex_colour, calc_pred_interval, calc_metrics 
 
 from .routes.chart import router as chart_router
 from .routes.forecast import router as forecast_router
 from .routes.predictionInterval import router as prediction_interval_router
 from .routes.root import router as root_router
+from .routes.metrics import router as metrics_router
 
 
 app = FastAPI()
+
 
 # Data
 app.state.registered_charts = {}
@@ -36,6 +38,7 @@ app.include_router(chart_router)
 app.include_router(forecast_router)
 app.include_router(prediction_interval_router)
 app.include_router(root_router)
+app.include_router(metrics_router)
 
 
 def get_user_data(filepath: str) -> None:
@@ -99,8 +102,12 @@ def load_forecasts() -> str:
 
         app.state.forecast_lines[current_forecast_chart][forecast] = {
             'lines' : [],
+            'dataLabels': [],
             'metrics' : {
-                'predIntervals': []
+                'predIntervals': [],
+                "MAE": [],
+                "RMSE": [],
+                "MAPE": []
             }
         }
 
@@ -125,6 +132,8 @@ def load_forecasts() -> str:
 
             ground_truth_data = current_chart_data[start_date_index : end_date_index+1]
             ground_truth_labels = current_chart_labels[start_date_index: end_date_index+1]
+            app.state.forecast_lines[current_forecast_chart][forecast]['dataLabels'] = ground_truth_labels
+
 
             '''Build Prediction Line'''
             line_color = random_hex_colour()
@@ -148,11 +157,19 @@ def load_forecasts() -> str:
             )
             app.state.forecast_lines[current_forecast_chart][forecast].get('metrics').get('predIntervals').append(prediction_interval_chart)
 
+
+            '''Get Data For Heatmap'''
+            metrics = calc_metrics(current_prediction[start_date_index::], ground_truth_data)
+            for key, value in metrics.items():
+                app.state.forecast_lines[current_forecast_chart][forecast].get('metrics').get(key).append(value)
+
+
     print("Forecasts Loaded")
 
 
 def main():
     if (len(sys.argv) != 3 or sys.argv[1] != "run"):
+        # TODO: Add flag for custom port number
         print("Usage: timeseriesanalysispackage run <user_script.py>")
         sys.exit(1)
 
