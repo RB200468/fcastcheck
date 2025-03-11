@@ -42,8 +42,7 @@
   .grid-item.analysis.interval {
     display: flex;
     gap: 0px;
-    align-items: center;
-    justify-content: center;
+    flex-flow: column;
   }
 
   @media (min-width: 577px) {
