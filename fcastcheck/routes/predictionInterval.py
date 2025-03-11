@@ -14,7 +14,12 @@ def get_predInterval(name: str, request: Request) -> JSONResponse:
     
     current_forecast = registered_forecasts[name]
     current_chart_name = current_forecast.get_chart()
+    current_forecast_data = forecast_lines[current_chart_name][name]
 
-    predIntervals = forecast_lines[current_chart_name][name].get('metrics').get('predIntervals')
+    predictions = current_forecast_data.get('predictions')
+    upperBounds = current_forecast_data['predIntervals'].get('upperBound')
+    lowerBounds = current_forecast_data['predIntervals'].get('lowerBound')
+    lineColors = current_forecast_data.get('lineColors')
+    timeLabels = current_forecast_data.get('dataLabels')
 
-    return JSONResponse(content={'content': predIntervals}, status_code=200)
+    return JSONResponse(content={'predictions': predictions, 'upperBounds': upperBounds, 'lowerBounds': lowerBounds, 'lineColors': lineColors, 'timeLabels': timeLabels }, status_code=200)

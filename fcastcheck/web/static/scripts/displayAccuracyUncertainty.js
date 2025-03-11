@@ -1,4 +1,15 @@
-document.addEventListener("forecastClicked", (event) => {
+document.addEventListener("forecastClicked", async (event) => {
+    const forecastName = event.detail;
+
+    try {
+        const response = await fetch(`http://localhost:8001/AccuracyUncertaintyMetrics?name=${forecastName}`);
+
+        if (!response.ok){
+            throw Error(`Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
         // Destroy old Canvas
         const container = document.getElementById('bubble-chart-wrapper');
         const oldCanvas = document.getElementById('bubbleChart');
@@ -11,31 +22,28 @@ document.addEventListener("forecastClicked", (event) => {
         newCanvas.role = 'svg';
         container.appendChild(newCanvas);
 
-        // Forecast data
-        const forecasts = ['Forecast1', 'Forecast2', 'Forecast3', 'Forecast4', 'Forecast5'];
-        const rmse = [1.2, 2.3, 0.9, 1.8, 2.0];
-        const msis = [0.5, 0.8, 0.3, 0.7, 0.6]; 
-        const wsql = [0.2, 0.4, 0.1, 0.5, 0.3]; 
-    
-        // Function to get color based on WSQL value
-        function getColor(value) {
-            if (value < 0.2) return "#B3D7F7"; // Light Blue
-            if (value < 0.4) return "#0069C3"; // Medium Blue
-            return "#003F8C"; // Dark Blue
-        }
-    
-        // Create multiple datasets (one per forecast) for individual labels
-        const datasets = forecasts.map((forecast, i) => ({
-            label: forecast,  // Each forecast has its own label
-            data: [{ x: rmse[i], y: msis[i], r: wsql[i] * 30 }], // Single point per dataset
-            backgroundColor: getColor(wsql[i]),
-            borderColor: getColor(wsql[i]),
-            borderWidth: 1
+        // Data
+        const models = data.models;
+        const rmse = data.rmse;
+        const msis = data.rmse;
+        const lineColors = data.colors;
+        const avgPredInterval = data.avgPredInterval;
+
+        // Create multiple datasets (one per model) for individual labels
+        const datasets = models.map((model, i) => ({
+            label: model, 
+            data: [{ x: avgPredInterval[i], y: rmse[i]}], 
+            backgroundColor: lineColors[i],
+            pointRadius: 10
         }));
-    
-        // Create the Chart.js bubble chart
+
+        // Create the chart
         const ctx = newCanvas.getContext('2d');
         bubbleChart = buildBubbleChart(ctx, datasets);
+
+    } catch (error) {
+        console.error(`Error: ${error}`);          
+    }
     
 });
 
@@ -43,7 +51,7 @@ function buildBubbleChart(ctx, chartData){
 
     const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
     const config = {
-        type: 'bubble',
+        type: 'scatter',
         data: { datasets: chartData },
         options: {
             responsive: true,
@@ -53,7 +61,7 @@ function buildBubbleChart(ctx, chartData){
                     callbacks: {
                         label: function (context) {
                             const data = context.raw;
-                            return `${context.dataset.label}: RMSE=${data.x}, MSIS=${data.y}, WSQL=${(data.r / 30).toFixed(2)}`;
+                            return `${context.dataset.label}: RMSE=${data.y.toFixed(3)}, AvgPredInt=${data.x.toFixed(3)}`;
                         }
                     }
                 },
@@ -61,14 +69,14 @@ function buildBubbleChart(ctx, chartData){
             },
             scales: {
                 y: {
-                    title: { display: true, text: 'MSIS (Lower is Better)' },
+                    title: { display: true, text: 'RMSE (Accuracy)' },
                     min: 0,
-                    max: 1,
+
                     grid: { color: txt_color_2_dark },
                     border: { color: txt_color_1, width: 1.25 }
                 },
                 x: {
-                    title: { display: true, text: 'RMSE (Lower is Better)' },
+                    title: { display: true, text: 'Average Prediction interval (Uncertainty)' },
                     min: 0,
                     grid: { color: txt_color_2_dark },
                     border: { color: txt_color_1, width: 1.25 }

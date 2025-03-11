@@ -23,11 +23,14 @@ document.addEventListener("forecastClicked", async (event) => {
              currentIndex = index;
              const rmse_data = data.content.RMSE[currentIndex];
              const mae_data = data.content.MAE[currentIndex];
+             const mape_data = data.content.MAPE[currentIndex];
+             const color = data.content.colors[currentIndex];
              const heatmapData = data.content.labels.flatMap((t, i) => [
              { group: t, variable: "RMSE", value: rmse_data[i] },
-             { group: t, variable: "MAE", value: mae_data[i] }
+             { group: t, variable: "MAE", value: mae_data[i] },
+             { group: t, variable: "MAPE", value: mape_data[i] }
              ]);
-             setupGraph(timeLabels, heatmapData)
+             setupGraph(timeLabels, heatmapData, color)
              updateActiveDot();
          }
      
@@ -50,7 +53,7 @@ document.addEventListener("forecastClicked", async (event) => {
     }
 })
 
-function setupGraph(timeLabels, data) {
+function setupGraph(timeLabels, data, color) {
     // Set margins
     const margin = {top: 5, right: 5, bottom: 50, left: 40};
 
@@ -70,7 +73,7 @@ function setupGraph(timeLabels, data) {
 
     // Labels of row and columns
     const myGroups = timeLabels;
-    const myVars = ["RMSE", "MAE"];
+    const myVars = ["RMSE", "MAE", "MAPE"];
 
     // Build X scales and axis
     const x = d3.scaleBand()
@@ -96,19 +99,28 @@ function setupGraph(timeLabels, data) {
     svg.append("g")
         .call(d3.axisLeft(y));
 
-    // Compute min/max separately for RMSE and MAPE
+    // Compute min/max separately for RMSE, MAE, and MAPE
     const rmseMin = d3.min(data.filter(d => d.variable === "RMSE"), d => d.value);
     const rmseMax = d3.max(data.filter(d => d.variable === "RMSE"), d => d.value);
 
     const maeMin = d3.min(data.filter(d => d.variable === "MAE"), d => d.value);
     const maeMax = d3.max(data.filter(d => d.variable === "MAE"), d => d.value);
 
-    const totalMin = d3.min([maeMin,rmseMin]);
-    const totalMax = d3.max([maeMax,rmseMax]);
+    const mapeMin = d3.min(data.filter(d => d.variable === "MAPE"), d => d.value);
+    const mapeMax = d3.max(data.filter(d => d.variable === "MAPE"), d => d.value);
 
-    const myColor = d3.scaleLinear()
-        .range(["white", "#0069C3"]) 
-        .domain([totalMin,totalMax]);
+    // Create separate color scales for each metric
+    const rmseColor = d3.scaleLinear()
+        .range(["white", color]) // Adjust color range as needed
+        .domain([0, rmseMax]);
+
+    const maeColor = d3.scaleLinear()
+        .range(["white", color])
+        .domain([0, maeMax]);
+
+    const mapeColor = d3.scaleLinear()
+        .range(["white", color])
+        .domain([0, mapeMax]);
 
     // Append a tooltip div (initially hidden)
     const tooltip = d3.select("body")
@@ -126,16 +138,23 @@ function setupGraph(timeLabels, data) {
     svg.selectAll()
         .data(data)
         .join("rect")
-        .attr("x", function(d) { return x(d.group); })
-        .attr("y", function(d) { return y(d.variable); })
+        .attr("x", d => x(d.group))
+        .attr("y", d => y(d.variable))
         .attr("width", x.bandwidth() * 0.8)
         .attr("height", y.bandwidth() * 1)
-        .style("fill", function(d) { return myColor(d.value); })
+        .style("fill", d => {
+            // Use the appropriate color scale based on the metric
+            if (d.variable === "RMSE") return rmseColor(d.value);
+            if (d.variable === "MAE") return maeColor(d.value);
+            if (d.variable === "MAPE") return mapeColor(d.value);
+            return "grey"; // Fallback color
+        })
+
 
         // Tooltip events
         .on("mouseover", function(event, d) {
             tooltip.style("opacity", 1) // Make visible
-                .html(`<strong>${d.variable}</strong><br>Value: ${d.value.toFixed(4)}`) // Set content
+                .html(`<strong>${d.variable}</strong><br>Value: ${d.value.toFixed(3)}`) // Set content
                 .style("left", (event.pageX + 10) + "px") // Position tooltip
                 .style("top", (event.pageY - 10) + "px")
                 .style("color", "black");

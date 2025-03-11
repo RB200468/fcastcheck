@@ -11,6 +11,16 @@ document.addEventListener("forecastClicked", async (event) => {
 
         const data = await response.json();
 
+        // Data
+        const timeLabels = data.timeLabels
+        const intervalChartData = data.lineColors.map((color, index) => ({
+            'prediction': data.predictions[index],
+            'upperBound': data.upperBounds[index],
+            'lowerBound': data.lowerBounds[index],
+            'lineColor': color
+        }));
+
+
         // Destroy old Canvas
         const container = document.getElementById('interval-chart-wrapper');
         const oldCanvas = document.getElementById('intervalChart');
@@ -25,7 +35,7 @@ document.addEventListener("forecastClicked", async (event) => {
 
         // Update New Canvas
         const ctx = newCanvas.getContext('2d');
-        intervalChart = buildIntervalChart(ctx,data.content[0]);
+        intervalChart = buildIntervalChart(ctx,intervalChartData[0], timeLabels);
 
 
         // Create Model Selector Dots
@@ -36,8 +46,7 @@ document.addEventListener("forecastClicked", async (event) => {
         function updateChart(index) {
             currentIndex = index;
             intervalChart.destroy();
-            intervalChart = buildIntervalChart(ctx, data.content[currentIndex])
-            console.log(data.content[currentIndex]);
+            intervalChart = buildIntervalChart(ctx, intervalChartData[currentIndex], timeLabels)
             updateActiveDot();
         }
     
@@ -48,7 +57,7 @@ document.addEventListener("forecastClicked", async (event) => {
         }
         
         // Handle selector dot creation, active class assignment and updateChart onClick
-        data.content.forEach((_, index) => {
+        intervalChartData.forEach((_, index) => {
             const dot = document.createElement("div");
             dot.classList.add("dot");
             if (index === currentIndex) dot.classList.add("active");
@@ -61,14 +70,13 @@ document.addEventListener("forecastClicked", async (event) => {
     }
 })
 
-function buildIntervalChart(ctx, data) {
+function buildIntervalChart(ctx, data, labels) {
     const txt_color_1 = getComputedStyle(document.documentElement).getPropertyValue('--txt-color-1').trim();
 
     const paddingFactor = 0.25; // 10% padding
 
-    const allDataPoints = data.datasets.flatMap(dataset => dataset.data);
-    const minY = Math.min(...allDataPoints);
-    const maxY = Math.max(...allDataPoints);
+    const minY = Math.min(...data.lowerBound);
+    const maxY = Math.max(...data.upperBound);
 
     // Calculate dynamic padding
     const range = maxY - minY;
@@ -78,11 +86,37 @@ function buildIntervalChart(ctx, data) {
     const suggestedMin = minY - padding;
     const suggestedMax = maxY + padding;
 
+    const datasets =  [
+        {
+            "label": "Predictions",
+            "data": data.prediction,
+            "borderColor": data.lineColor,
+            "borderWidth": 2,
+            "fill": false
+        },
+        {
+            "label": "Prediction Inverval 95%",
+            "data": data.upperBound,
+            "borderColor": data.lineColor,
+            "borderWidth": 0,
+            "backgroundColor": 'rgba(0,76,140,0.3)',
+            "fill": -1
+        },
+        {
+            "label": "",
+            "data": data.lowerBound,
+            "borderColor": data.lineColor,
+            "borderWidth": 0,
+            "backgroundColor": 'rgba(0,76,140,0.3)',
+            "fill": 1
+        }
+    ] 
+
     const config = {
         type: 'line',
         data: {
-            labels: data.labels,
-            datasets: data.datasets
+            labels: labels,
+            datasets: datasets
         },
         options: {
             responsive: true,
