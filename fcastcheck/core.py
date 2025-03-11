@@ -14,6 +14,7 @@ from .routes.forecast import router as forecast_router
 from .routes.predictionInterval import router as prediction_interval_router
 from .routes.root import router as root_router
 from .routes.metrics import router as metrics_router
+from .routes.accuracyUncertainty import router as a_u_router
 
 
 app = FastAPI()
@@ -39,6 +40,7 @@ app.include_router(forecast_router)
 app.include_router(prediction_interval_router)
 app.include_router(root_router)
 app.include_router(metrics_router)
+app.include_router(a_u_router)
 
 
 def get_user_data(filepath: str) -> None:
@@ -55,17 +57,17 @@ def get_user_data(filepath: str) -> None:
         attr_value = getattr(user_module, attr_name)
 
         if isinstance(attr_value, Chart):
-            """Checks for Chart objects"""
+            # Checks for Chart objects
             app.state.registered_charts[attr_name] = attr_value.getChartData()
             print(f'Successfully added chart: {attr_name}')
 
         elif isclass(attr_value) and issubclass(attr_value, ForecastingModel) and attr_name != 'ForecastingModel':
-            """Checks for ForecastingModel subclasses"""
+            # Checks for ForecastingModel subclasses
             app.state.registered_models[attr_name] = attr_value
             print(f'Successfully added model: {attr_name}')
 
         elif isinstance(attr_value, Forecast):
-            """Checks for Forecast Objects"""
+            # Checks for Forecast Objects
             app.state.registered_forecasts[attr_name] = attr_value
             print(f"Successfully added forecast: {attr_name}")
 
@@ -78,6 +80,7 @@ def get_user_data(filepath: str) -> None:
 
 def load_forecasts() -> str:
     for forecast in app.state.registered_forecasts.keys():
+        # Validate each Forecast and Model
         current_forecast = app.state.registered_forecasts[forecast]
 
         current_forecast_chart = current_forecast.get_chart()
@@ -100,16 +103,23 @@ def load_forecasts() -> str:
         if forecast in app.state.forecast_lines.get(current_forecast_chart).keys():
             raise ValueError("ERROR: Only Unique Forecast Names Allowed")
 
+        # Define Data Structure
         app.state.forecast_lines[current_forecast_chart][forecast] = {
             'lines' : [],
+            'lineColors': [],
             'dataLabels': [],
+            'predictions': [],
+            'predIntervals': {
+                "upperBound": [],
+                "lowerBound": []
+            },
             'metrics' : {
-                'predIntervals': [],
                 "MAE": [],
                 "RMSE": [],
                 "MAPE": []
             }
         }
+        current_forecast_data = app.state.forecast_lines[current_forecast_chart][forecast]
 
         # Validate forecast spread and calculate required steps
         current_chart_labels = current_chart.get('labels')
@@ -124,19 +134,22 @@ def load_forecasts() -> str:
         current_chart_data = current_chart.get('datasets')[0].get('data')
         training_data = current_chart_data[0:start_date_index]
         for i,_ in enumerate(current_models):
-            '''Fit and Predict Model'''
+            # Fit and Predict Model
             current_model = current_models[i]()
             current_model.fit(data=training_data)
             current_prediction = [None] * len(training_data)
             current_prediction.extend(current_model.predict(steps=steps))
+            current_forecast_data.get('predictions').append(current_prediction[start_date_index::])
 
             ground_truth_data = current_chart_data[start_date_index : end_date_index+1]
             ground_truth_labels = current_chart_labels[start_date_index: end_date_index+1]
-            app.state.forecast_lines[current_forecast_chart][forecast]['dataLabels'] = ground_truth_labels
+            current_forecast_data['dataLabels'] = ground_truth_labels
 
 
-            '''Build Prediction Line'''
+            # Build Prediction Line
             line_color = random_hex_colour()
+            current_forecast_data.get('lineColors').append(line_color)
+
             current_forecast_line = {
                 "label": current_forecast.get_models()[i],
                 "data": current_prediction,
@@ -144,25 +157,22 @@ def load_forecasts() -> str:
                 "backgroundColor": line_color,
                 "borderDash": [5,5]
             }
-            app.state.forecast_lines[current_forecast_chart][forecast].get('lines').append(current_forecast_line)
+            current_forecast_data.get('lines').append(current_forecast_line)
 
 
-            '''Build Prediction Interval Chart'''
-            prediction_interval_chart = calc_pred_interval(
-                ground_truth_labels=ground_truth_labels,
+            # Build Prediction Intervals
+            lowerBound, upperBound = calc_pred_interval(
                 ground_truth_data=ground_truth_data,
                 predictions=current_prediction[start_date_index::],
-                line_color=line_color,
-                interval=0.95
             )
-            app.state.forecast_lines[current_forecast_chart][forecast].get('metrics').get('predIntervals').append(prediction_interval_chart)
+            current_forecast_data.get('predIntervals').get('upperBound').append(upperBound)
+            current_forecast_data.get('predIntervals').get('lowerBound').append(lowerBound)
 
 
-            '''Get Data For Heatmap'''
+            # Get Data For Heatmap
             metrics = calc_metrics(current_prediction[start_date_index::], ground_truth_data)
             for key, value in metrics.items():
-                app.state.forecast_lines[current_forecast_chart][forecast].get('metrics').get(key).append(value)
-
+                current_forecast_data.get('metrics').get(key).append(value)
 
     print("Forecasts Loaded")
 
