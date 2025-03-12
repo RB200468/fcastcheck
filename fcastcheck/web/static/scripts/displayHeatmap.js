@@ -141,7 +141,7 @@ function setupGraph(timeLabels, data, color) {
         .attr("x", d => x(d.group))
         .attr("y", d => y(d.variable))
         .attr("width", x.bandwidth() * 0.8)
-        .attr("height", y.bandwidth() * 1)
+        .attr("height", y.bandwidth() * 0.95)
         .style("fill", d => {
             // Use the appropriate color scale based on the metric
             if (d.variable === "RMSE") return rmseColor(d.value);

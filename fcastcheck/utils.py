@@ -1,5 +1,6 @@
 import random, math
 import numpy as np
+from sklearn.preprocessing import StandardScaler
 import scipy.stats as stats
 
 
@@ -60,3 +61,33 @@ def calc_smape(predictions: list, groundTruth: list) -> float:
 
 def calc_mase(predictions: list, groundTruth: list) -> float:
     ...    
+
+def make_stationary(data, diff_order=1):
+    data = np.array(data, dtype=float)
+    last_values = data[-diff_order:]  
+
+    # Differencing
+    for _ in range(diff_order):
+        data = np.diff(data, n=1)
+
+    # Standardization
+    scaler = StandardScaler()
+    standardized_data = scaler.fit_transform(data.reshape(-1, 1)).flatten()
+
+    return standardized_data, scaler, last_values
+
+
+def reverse_transform(predictions, scaler, last_values, diff_order=1):
+    """ Reverses standardization and differencing. """
+    # Reverse standardization
+    predictions = np.array(predictions, dtype=float)
+    original_predictions = scaler.inverse_transform(predictions.reshape(-1, 1)).flatten()
+
+    # Reverse differencing
+    if diff_order == 1:
+        restored_predictions = np.cumsum(np.insert(original_predictions, 0, last_values))
+    elif diff_order == 2:
+        restored_predictions = np.cumsum(np.insert(original_predictions, 0, last_values[0]))
+        restored_predictions += last_values[1]
+    
+    return restored_predictions
