@@ -8,18 +8,37 @@ def random_hex_colour():
     return "#{:06x}".format(random.randint(0,0xFFFFFF))
 
 
-def calc_pred_interval(ground_truth_data, predictions, interval:float = 0.95):
-    residuals = np.array(ground_truth_data) - np.array(predictions)
-    std_deviation = np.std(residuals, ddof=1)
-
-    ground_truth_length = len(ground_truth_data)
-    t_value = stats.t.ppf((1+interval) / 2, df=ground_truth_length-1)
-
-    margin = t_value * std_deviation
-
-    lower_bound = (np.array(predictions) - margin).tolist()
-    upper_bound = (np.array(predictions) + margin).tolist()
+def calc_pred_interval(ground_truth_data, predictions, interval: float = 0.95, window_size: int = 5):
+    ground_truth_data = np.asarray(ground_truth_data)
+    predictions = np.asarray(predictions)
     
+    if len(ground_truth_data) < 2:
+        raise ValueError("Not enough data points to compute prediction intervals.")
+    
+    # Compute residuals (errors)
+    residuals = ground_truth_data - predictions
+    
+    # Rolling standard deviation (localized variance estimation)
+    rolling_std = np.array([
+        np.std(residuals[max(0, i - window_size + 1): i + 1], ddof=1)
+        for i in range(len(residuals))
+    ])
+
+    # Replace NaNs (from small window sizes at the start) with global std deviation
+    global_std = np.std(residuals, ddof=1)
+    rolling_std = np.where(np.isnan(rolling_std), global_std, rolling_std)
+
+    # Compute t-distribution critical value
+    df = max(len(ground_truth_data) - 1, 1)  # Ensure df is at least 1
+    t_value = stats.t.ppf((1 + interval) / 2, df=df)
+
+    # Compute time-dependent margins
+    margin = t_value * rolling_std  # Scale margin by local variance
+
+    # Compute bounds
+    lower_bound = (predictions - margin).tolist()
+    upper_bound = (predictions + margin).tolist()
+
     return lower_bound, upper_bound
 
 
