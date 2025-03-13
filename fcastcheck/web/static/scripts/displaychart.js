@@ -35,6 +35,22 @@ document.addEventListener("activeChartChanged", async (event) => {
 });
 
 function buildChart(ctx, chartData){
+    // Flatten all data points across datasets
+    const allValues = chartData.datasets.flatMap(dataset => dataset.data.filter(value => value !== null && value !== undefined));
+
+    // Get the min and max values
+    const minY = Math.min(...allValues);
+    const maxY = Math.max(...allValues);
+
+    // Calculate dynamic padding
+    const range = maxY - minY;
+    const padding = range * 0.25;
+
+    // Adjusted axis limits
+    const suggestedMin = minY - padding;
+    const suggestedMax = maxY + padding;
+    
+
     const timeSeriesData = {
         labels: chartData.labels,
         datasets: chartData.datasets
@@ -62,7 +78,7 @@ function buildChart(ctx, chartData){
                     border: { color: txt_color_1 }
                 },
                 y: {
-                    beginAtZero: true,
+                    beginAtZero: false,
                     title: {
                         display: true,
                         text: chartData.title,
@@ -70,7 +86,9 @@ function buildChart(ctx, chartData){
                     },
                     ticks: { color: txt_color_1 },
                     grid: { display: false },
-                    border: { color: txt_color_1 }
+                    border: { color: txt_color_1 },
+                    min: suggestedMin,
+                    max: suggestedMax
                 },
             },   
         },
