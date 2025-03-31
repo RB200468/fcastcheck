@@ -1,7 +1,10 @@
 import random, math
 import numpy as np
 from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KernelDensity
 import scipy.stats as stats
+from scipy.stats import gaussian_kde
 
 
 def random_hex_colour():
@@ -14,33 +17,30 @@ def calc_pred_interval(ground_truth_data, predictions, interval: float = 0.95, w
     
     if len(ground_truth_data) < 2:
         raise ValueError("Not enough data points to compute prediction intervals.")
-    
-    # Compute residuals (errors)
+
     residuals = ground_truth_data - predictions
-    
-    # Rolling standard deviation (localized variance estimation)
+
+    # Rolling standard deviation with safeguards
     rolling_std = np.array([
-        np.std(residuals[max(0, i - window_size + 1): i + 1], ddof=1)
+        np.std(residuals[max(0, i - window_size + 1): i + 1], ddof=min(1, len(residuals[max(0, i - window_size + 1): i + 1]) - 1)) 
+        if i >= window_size - 1 else np.std(residuals[:i + 1], ddof=1)
         for i in range(len(residuals))
     ])
 
-    # Replace NaNs (from small window sizes at the start) with global std deviation
-    global_std = np.std(residuals, ddof=1)
-    rolling_std = np.where(np.isnan(rolling_std), global_std, rolling_std)
+    # Replace NaNs or invalid std values with a fallback
+    global_std = np.std(residuals, ddof=1) if len(residuals) > 1 else 1e-6  # Small fallback value
+    rolling_std = np.nan_to_num(rolling_std, nan=global_std, posinf=global_std, neginf=global_std)
 
     # Compute t-distribution critical value
-    df = max(len(ground_truth_data) - 1, 1)  # Ensure df is at least 1
+    df = max(len(ground_truth_data) - 1, 1)
     t_value = stats.t.ppf((1 + interval) / 2, df=df)
 
-    # Compute time-dependent margins
-    margin = t_value * rolling_std  # Scale margin by local variance
-
     # Compute bounds
+    margin = t_value * rolling_std
     lower_bound = (predictions - margin).tolist()
     upper_bound = (predictions + margin).tolist()
 
     return lower_bound, upper_bound
-
 
 def calc_metrics(predictions: list, groundTruth: list) -> dict:
     mean_absolute_error = []
@@ -75,11 +75,6 @@ def calc_mape(predictions: list, groundTruth: list) -> float:
     # Mean Absolute Percentage Error
     return abs(sum((100*(i-j))/i for i,j in zip(groundTruth,predictions))/len(predictions))
 
-def calc_smape(predictions: list, groundTruth: list) -> float:
-    ...
-
-def calc_mase(predictions: list, groundTruth: list) -> float:
-    ...    
 
 def make_stationary(data, diff_order=1):
     data = np.array(data, dtype=float)
@@ -110,3 +105,28 @@ def reverse_transform(predictions, scaler, last_values, diff_order=1):
         restored_predictions += last_values[1]
     
     return restored_predictions
+
+
+def cross_validation_bandwidth(data):
+    bandwidths = np.linspace(0.01,0.1,100)
+    
+    data = np.array(data).reshape(-1, 1)
+
+    grid = GridSearchCV(KernelDensity(kernel='gaussian'), param_grid={'bandwidth': bandwidths}, cv=5) 
+    grid.fit(data)
+
+    best_bandwidth = grid.best_estimator_.bandwidth
+    return best_bandwidth
+
+
+
+def density_data(rmseValues, x_values):
+    optimal_bandwidth = cross_validation_bandwidth(rmseValues)
+
+    kde = gaussian_kde(rmseValues, bw_method=optimal_bandwidth / np.std(rmseValues, ddof=1))
+    densityValues = kde(x_values)
+
+    return densityValues.tolist()
+
+
+
