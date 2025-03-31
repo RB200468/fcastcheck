@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from inspect import isclass
 from .chart import Chart
 from .forecasting import ForecastingModel, Forecast
-from .utils import random_hex_colour, calc_pred_interval, calc_metrics, make_stationary, reverse_transform
+from .utils import random_hex_colour, calc_pred_interval, calc_metrics, make_stationary, reverse_transform, density_data
 
 from .routes.chart import router as chart_router
 from .routes.forecast import router as forecast_router
@@ -15,6 +15,7 @@ from .routes.predictionInterval import router as prediction_interval_router
 from .routes.root import router as root_router
 from .routes.metrics import router as metrics_router
 from .routes.accuracyUncertainty import router as a_u_router
+from .routes.kernelDensity import router as kernel_density_router
 
 
 app = FastAPI()
@@ -41,6 +42,7 @@ app.include_router(prediction_interval_router)
 app.include_router(root_router)
 app.include_router(metrics_router)
 app.include_router(a_u_router)
+app.include_router(kernel_density_router)
 
 
 def get_user_data(filepath: str) -> None:
@@ -177,6 +179,7 @@ def load_forecasts() -> str:
             metrics = calc_metrics(current_prediction[start_date_index::], ground_truth_data)
             for key, value in metrics.items():
                 current_forecast_data.get('metrics').get(key).append(value)
+
 
     print("Forecasts Loaded")
 
