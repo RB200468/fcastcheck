@@ -4,7 +4,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import KernelDensity
 import scipy.stats as stats
-from scipy.stats import gaussian_kde
+from scipy.stats import gaussian_kde, norm
 
 
 def random_hex_colour():
@@ -20,23 +20,15 @@ def calc_pred_interval(ground_truth_data, predictions, interval: float = 0.95, w
 
     residuals = ground_truth_data - predictions
 
-    # Rolling standard deviation with safeguards
-    rolling_std = np.array([
-        np.std(residuals[max(0, i - window_size + 1): i + 1], ddof=min(1, len(residuals[max(0, i - window_size + 1): i + 1]) - 1)) 
-        if i >= window_size - 1 else np.std(residuals[:i + 1], ddof=1)
-        for i in range(len(residuals))
-    ])
+    std_dev = np.std(residuals)
 
-    # Replace NaNs or invalid std values with a fallback
-    global_std = np.std(residuals, ddof=1) if len(residuals) > 1 else 1e-6  # Small fallback value
-    rolling_std = np.nan_to_num(rolling_std, nan=global_std, posinf=global_std, neginf=global_std)
-
-    # Compute t-distribution critical value
-    df = max(len(ground_truth_data) - 1, 1)
-    t_value = stats.t.ppf((1 + interval) / 2, df=df)
+    # Scale std_div by sqrt of index +1 to make naive scaling 
+    naive_scaling = np.array([np.sqrt(i+1) for i in range(len(predictions))])
+    
+    critical_val = norm.ppf((1 + interval)/2)
 
     # Compute bounds
-    margin = t_value * rolling_std
+    margin = critical_val * std_dev * naive_scaling
     lower_bound = (predictions - margin).tolist()
     upper_bound = (predictions + margin).tolist()
 
