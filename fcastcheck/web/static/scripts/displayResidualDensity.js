@@ -73,7 +73,8 @@ function buildDensityChart(ctx, data, labels) {
                         minRotation: 45,
                         color: txt_color_1,
                         callback: function(value) {
-                            return parseFloat(value).toFixed(2);
+                            const label = this.getLabelForValue(value);
+                            return parseFloat(label).toFixed(2);
                         }
                     },
                     grid: { color: txt_color_2_dark },
