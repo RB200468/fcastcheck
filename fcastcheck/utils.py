@@ -35,28 +35,21 @@ def calc_pred_interval(ground_truth_data, predictions, interval: float = 0.95):
     return lower_bound, upper_bound
 
 def calc_metrics(predictions: list, groundTruth: list) -> dict:
-    mean_absolute_error = []
     root_mean_Squared_error = []
-    mean_absolute_percentage_error = []
 
     for i,_ in enumerate(predictions):
         root_mean_Squared_error.append(calc_rmse(predictions[0:i+1], groundTruth[0:i+1]))
     
     metrics_dict = {
-        "MAE": mean_absolute_error,
         "RMSE": root_mean_Squared_error,
-        "MAPE": mean_absolute_percentage_error,
     }
 
     return metrics_dict
 
-def calc_residuals(predictions: list, groundTruth: list) -> list:
-    return groundTruth - predictions
 
 def calc_rmse(predictions: list, groundTruth: list) -> float:
     # Root Mean Squared Error
     return math.sqrt(sum(pow(i-j,2) for i,j in zip(groundTruth,predictions))/len(predictions))
-
 
 
 def make_stationary(data, diff_order=1):
