@@ -17,7 +17,8 @@ document.addEventListener("forecastClicked", async (event) => {
             'prediction': data.predictions[index],
             'upperBound': data.upperBounds[index],
             'lowerBound': data.lowerBounds[index],
-            'lineColor': color
+            'lineColor': color,
+            'modelName': data.modelNames[index]
         }));
 
 
@@ -88,7 +89,7 @@ function buildIntervalChart(ctx, data, labels) {
 
     const datasets =  [
         {
-            "label": "Predictions",
+            "label": data.modelName,
             "data": data.prediction,
             "borderColor": data.lineColor,
             "borderWidth": 2,
