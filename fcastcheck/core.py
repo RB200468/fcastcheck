@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from inspect import isclass
 from .chart import Chart
 from .forecasting import ForecastingModel, Forecast
-from .utils import random_hex_colour, calc_pred_interval, calc_metrics, make_stationary, reverse_transform, density_data
+from .utils import random_hex_colour, calc_pred_interval, calc_metrics, density_data
 
 from .routes.chart import router as chart_router
 from .routes.forecast import router as forecast_router
@@ -135,15 +135,13 @@ def load_forecasts() -> str:
         # Fit and predict each model
         current_chart_data = current_chart.get('datasets')[0].get('data')
         training_data = current_chart_data[0:start_date_index]
-        standardized_data, scaler, last_values = make_stationary(training_data)
         for i,_ in enumerate(current_models):
             # Fit and Predict Model
             current_model = current_models[i]()
-            current_model.fit(data=standardized_data)
-            standardized_prediction_data = current_model.predict(steps=steps)
-            prediction_data = reverse_transform(standardized_prediction_data, scaler, last_values)
+            current_model.fit(data=training_data)
+            prediction_data = current_model.predict(steps=steps)
             
-            current_prediction = [None] * len(standardized_data)
+            current_prediction = [None] * len(training_data)
             current_prediction.extend(prediction_data)
             current_forecast_data.get('predictions').append(current_prediction[start_date_index::])
 
