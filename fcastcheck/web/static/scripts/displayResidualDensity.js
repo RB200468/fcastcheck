@@ -77,7 +77,7 @@ function buildDensityChart(ctx, data, labels) {
                             return parseFloat(label).toFixed(2);
                         }
                     },
-                    grid: { color: txt_color_2_dark },
+                    grid: { display: false },
                     border: { color: txt_color_1, width: 1.25 }
                 },
                 y: {
@@ -87,7 +87,7 @@ function buildDensityChart(ctx, data, labels) {
                         color: txt_color_1
                     },
                     ticks: {color: txt_color_1},
-                    grid: { color: txt_color_2_dark },
+                    grid: { display: false },
                     border: { color: txt_color_1, width: 1.25 },
                 }
             },

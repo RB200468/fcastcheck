@@ -134,7 +134,7 @@ function buildIntervalChart(ctx, data, labels) {
                         minRotation: 45,
                         color: txt_color_1
                     },
-                    grid: { color: txt_color_2_dark },
+                    grid: { display: false },
                     border: { color: txt_color_1, width: 1.25 }
                 },
                 y: {
@@ -144,7 +144,7 @@ function buildIntervalChart(ctx, data, labels) {
                         color: txt_color_1
                     },
                     ticks: {color: txt_color_1},
-                    grid: { color: txt_color_2_dark },
+                    grid: { display: false },
                     border: { color: txt_color_1, width: 1.25 },
                     suggestedMin: suggestedMin,
                     suggestedMax: suggestedMax
